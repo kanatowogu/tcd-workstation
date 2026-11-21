@@ -2180,3 +2180,162 @@ button {
     visibility: hidden;
   }
 }
+
+/* ==========================================================================
+   8. PHASE 1 MINIMALIST SINGLE-LINE SUBTITLE & DEV STAGE SWITCHER
+   ========================================================================== */
+
+.dev-stage-bar {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(18, 20, 18, 0.55);
+  border: 1px solid rgba(138, 130, 114, 0.25);
+  padding: 2px 5px;
+  font-size: 10px;
+  color: #b8ae9e;
+  opacity: 0.45;
+  transition: opacity 0.18s ease;
+}
+
+.dev-stage-bar:hover {
+  opacity: 0.96;
+}
+
+.dev-stage-bar.dev-bar-stealth {
+  opacity: 0.22;
+}
+
+.dev-stage-bar.dev-bar-stealth:hover {
+  opacity: 0.96;
+}
+
+.dev-toggle-btn,
+.dev-act-btn,
+.dev-score-btn {
+  background: transparent;
+  color: #d4c8b0;
+  border: 1px solid rgba(140, 130, 115, 0.4);
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.dev-toggle-btn:hover,
+.dev-act-btn:hover,
+.dev-score-btn:hover {
+  background: #dfd7c8;
+  color: #141210;
+}
+
+.dev-act-btn.active {
+  background: #dfd7c8;
+  color: #141210;
+  border-color: #ffffff;
+}
+
+.dev-controls-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dev-sep {
+  opacity: 0.45;
+  margin: 0 2px;
+}
+
+.dev-hotkey-hint {
+  font-size: 9.5px;
+  color: #8c8273;
+  margin-left: 2px;
+}
+
+/* Single, Unobtrusive Bottom-Edge Subtitle Line */
+.single-line-subtitle-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  z-index: 55;
+  pointer-events: none;
+  max-width: min(92vw, 960px);
+  padding: 5px 16px;
+  background: rgba(8, 7, 6, 0.84);
+  border: 1px solid rgba(140, 130, 115, 0.26);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(3px);
+  transition: bottom 0.25s ease, opacity 0.18s ease;
+}
+
+.single-line-subtitle-hud.subtitle-monitor-mode {
+  bottom: 4px;
+  padding: 3px 12px;
+  background: rgba(8, 7, 6, 0.78);
+  font-size: 12.5px;
+}
+
+.single-line-subtitle-text {
+  font-family: var(--font-serif-doc);
+  font-size: 14px;
+  color: #f2ece1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+}
+
+.single-line-subtitle-hud.subtitle-monitor-mode .single-line-subtitle-text {
+  font-size: 12.5px;
+}
+
+/* Chunky PS1 Blocky World-Space Prompts & Sharp UI Aesthetic */
+.ps1-world-prompt {
+  background: #141614;
+  color: #e6dfd0;
+  border: 2px solid #8a8272;
+  padding: 2px 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 #000000;
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.ps1-world-prompt.prompt-locked {
+  background: #240c0e;
+  color: #f2b6bc;
+  border-color: #b8323e;
+}
+
+.bottom-hover-preview-tag {
+  position: fixed;
+  bottom: 44px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 56;
+  pointer-events: none;
+  background: #141614;
+  border: 2px solid #c9beaa;
+  color: #f2ece1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 11px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 #000000;
+  border-radius: 0;
+}

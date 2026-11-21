@@ -1,0 +1,1975 @@
+/* ==========================================================================
+   TCD-OS v1.84 — FOUR-STAGE PALETTES
+   Act 1: Authentic Early-1990s Win 3.1 Teal (#008080) & Beveled #c0c0c0 Chrome
+   Act 2: Pony Island Subversive Bleed (#133336 + Scratched Tally Marks + RGB)
+   Act 3: Sunny, Clean, Overly Cheerful Model Office Desktop
+   Act 4: AUDIT_302.EXE Dark Crimson Interrogation Desktop
+   ========================================================================== */
+
+.crt-overlay-portal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 1024px;
+  height: 604px;
+  z-index: 35;
+  overflow: hidden;
+  border-radius: 5px;
+  transform-origin: 0 0;
+  will-change: transform;
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.55);
+}
+
+.tcd-os-crt-screen {
+  position: relative;
+  width: 1024px;
+  height: 604px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.48;
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   PALETTE 1: ACT 1 — AUTHENTIC EARLY-1990s OFFICE OS (WIN 3.1 / CLASSIC TEAL)
+   -------------------------------------------------------------------------- */
+.tcd-os-crt-screen.theme-act1-win90s {
+  --os-wallpaper: #008080;
+  --os-chrome: #c0c0c0;
+  --os-chrome-light: #ffffff;
+  --os-chrome-mid: #dfdfdf;
+  --os-chrome-shadow: #808080;
+  --os-chrome-dark: #404040;
+  --os-title-active-bg: #000080;
+  --os-title-active-ink: #ffffff;
+  --os-title-inactive-bg: #808080;
+  --os-title-inactive-ink: #dcdcdc;
+  --os-pane-bg: #ffffff;
+  --os-pane-alt: #f4f4f0;
+  --os-ink: #111111;
+  --os-ink-dim: #4c4c48;
+  --os-border-inner: #a0a09a;
+  --os-accent: #000080;
+  --os-desktop-label-ink: #ffffff;
+  --os-alert: #b81d2a;
+
+  background-color: var(--os-wallpaper);
+  color: var(--os-ink);
+}
+
+/* --------------------------------------------------------------------------
+   PALETTE 2: ACT 2 — PONY ISLAND SUBVERSIVE BLEED
+   -------------------------------------------------------------------------- */
+.tcd-os-crt-screen.theme-act2-bleed {
+  --os-wallpaper: #133336;
+  --os-chrome: #b6b9b4;
+  --os-chrome-light: #e8eae6;
+  --os-chrome-mid: #cfd2cd;
+  --os-chrome-shadow: #6e7370;
+  --os-chrome-dark: #2c3130;
+  --os-title-active-bg: #0f2547;
+  --os-title-active-ink: #f4f6f8;
+  --os-title-inactive-bg: #5e6668;
+  --os-title-inactive-ink: #d4dad9;
+  --os-pane-bg: #f3f2eb;
+  --os-pane-alt: #e6e5dc;
+  --os-ink: #131514;
+  --os-ink-dim: #4b524f;
+  --os-border-inner: #8e9490;
+  --os-accent: #14366b;
+  --os-desktop-label-ink: #e8f5f4;
+  --os-alert: #c22230;
+
+  background: radial-gradient(circle at 50% 42%, #194246 0%, #133336 62%, #0c2224 100%);
+  color: var(--os-ink);
+}
+
+/* --------------------------------------------------------------------------
+   PALETTE 3: ACT 3 — CLEAN, SUNNY MODEL-OFFICE FAIRY-TALE DESKTOP
+   -------------------------------------------------------------------------- */
+.tcd-os-crt-screen.theme-act3-fairytale {
+  --os-wallpaper: #7ec8ff;
+  --os-chrome: #eaf4ff;
+  --os-chrome-light: #ffffff;
+  --os-chrome-mid: #d4e8fb;
+  --os-chrome-shadow: #7fa7cf;
+  --os-chrome-dark: #325780;
+  --os-title-active-bg: linear-gradient(90deg, #2b8be6 0%, #5cb8ff 58%, #f2b749 100%);
+  --os-title-active-ink: #ffffff;
+  --os-title-inactive-bg: #9cbfe0;
+  --os-title-inactive-ink: #223b54;
+  --os-pane-bg: #ffffff;
+  --os-pane-alt: #f3f9ff;
+  --os-ink: #162638;
+  --os-ink-dim: #46617d;
+  --os-border-inner: #8fb4d8;
+  --os-accent: #1d6fc4;
+  --os-desktop-label-ink: #122b45;
+  --os-alert: #1d6fc4;
+
+  background: linear-gradient(180deg, #7ec8ff 0%, #c8ecff 46%, #fff9d6 80%, #ffe9f2 100%);
+  color: var(--os-ink);
+}
+
+/* --------------------------------------------------------------------------
+   PALETTE 4: ACT 4 — AUDIT_302.EXE MANDATORY INTERROGATION DESKTOP
+   -------------------------------------------------------------------------- */
+.tcd-os-crt-screen.theme-act4-audit {
+  --os-wallpaper: #220b12;
+  --os-chrome: #ddd2d5;
+  --os-chrome-light: #fff7f9;
+  --os-chrome-mid: #cbbbc0;
+  --os-chrome-shadow: #7a5c64;
+  --os-chrome-dark: #331920;
+  --os-title-active-bg: linear-gradient(90deg, #6e1020 0%, #a82035 100%);
+  --os-title-active-ink: #ffffff;
+  --os-title-inactive-bg: #6b5258;
+  --os-title-inactive-ink: #eadcdf;
+  --os-pane-bg: #fffbfc;
+  --os-pane-alt: #f7eef0;
+  --os-ink: #1a0b0f;
+  --os-ink-dim: #5e3b44;
+  --os-border-inner: #a8848e;
+  --os-accent: #9c172b;
+  --os-desktop-label-ink: #ffecee;
+  --os-alert: #c91229;
+
+  background: radial-gradient(circle at 50% 42%, #3a121b 0%, #220b12 65%, #120508 100%);
+  color: var(--os-ink);
+}
+
+/* Subtle CRT Scanline & Curved Glass Vignette */
+.crt-scanline-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.1) 0px,
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 68%,
+      rgba(0, 0, 0, 0.34) 100%
+    );
+}
+
+/* Act 3 Rotating Tri-Color Disco Light Reflection Glinting on CRT Glass */
+.crt-disco-reflection {
+  position: absolute;
+  inset: 0;
+  z-index: 91;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  mix-blend-mode: screen;
+}
+
+.crt-disco-reflection.disco-active {
+  opacity: 0.18;
+  background: radial-gradient(
+      circle at 10% 18%,
+      rgba(255, 0, 127, 0.55) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 22%,
+      rgba(0, 229, 255, 0.48) 0%,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 52% 95%,
+      rgba(255, 170, 0, 0.42) 0%,
+      transparent 42%
+    );
+  animation: crtDiscoWash 9s linear infinite;
+}
+
+.crt-disco-reflection.disco-frozen {
+  opacity: 0.2;
+  background: radial-gradient(
+      circle at 14% 20%,
+      rgba(255, 0, 127, 0.45) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 86% 20%,
+      rgba(0, 229, 255, 0.42) 0%,
+      transparent 45%
+    );
+}
+
+/* Act 3 Subtle Dark-Red Static Bleed Around Fairy-Tale Edges */
+.crt-crimson-edge-bleed {
+  position: absolute;
+  inset: 0;
+  z-index: 92;
+  pointer-events: none;
+  box-shadow: inset 0 0 38px rgba(155, 0, 26, 0.44),
+    inset 0 0 10px rgba(90, 0, 14, 0.55);
+  animation: crimsonEdgeFlicker 7s infinite;
+}
+
+@keyframes crimsonEdgeFlicker {
+  0%, 92%, 100% {
+    opacity: 0.72;
+  }
+  94% {
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.55;
+  }
+  98% {
+    opacity: 0.98;
+  }
+}
+
+@keyframes crtDiscoWash {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   DESKTOP WORKSPACE, WALLPAPER OVERLAYS & ICON GRID
+   ========================================================================== */
+
+.tcd-os-workspace {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: opacity 0.4s ease;
+}
+
+.tcd-os-workspace.shell-unmounted {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.os-wallpaper-svg {
+  position: absolute;
+  inset: 0 0 34px 0;
+  width: 100%;
+  height: calc(100% - 34px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tcd-os-watermark {
+  position: absolute;
+  right: 18px;
+  bottom: 46px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.48);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tcd-fairytale-slogan-card {
+  background: rgba(255, 253, 240, 0.94);
+  border: 2px solid #e5a93c;
+  box-shadow: 3px 3px 0 rgba(50, 87, 128, 0.35);
+  padding: 6px 12px;
+  color: #153e6e;
+}
+
+.fairytale-slogan-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+.fairytale-slogan-sub {
+  font-size: 10.5px;
+  color: #2c669e;
+  margin-top: 2px;
+}
+
+.tcd-desktop-icons {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  bottom: 44px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
+  z-index: 2;
+}
+
+.tcd-desktop-icon {
+  width: 88px;
+  padding: 6px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px dotted transparent;
+  color: var(--os-desktop-label-ink);
+  text-align: center;
+}
+
+.tcd-desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.tcd-desktop-icon.icon-selected {
+  background: #000080;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.theme-act3-fairytale .tcd-desktop-icon.icon-selected {
+  background: #1d6fc4;
+  color: #ffffff;
+}
+
+.tcd-icon-box {
+  width: 40px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--os-chrome);
+  color: #111111;
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Act 2 Pony Island RGB Chromatic Aberration Outlines on Icons */
+.theme-act2-bleed .tcd-icon-box {
+  box-shadow: -2px 0 0 rgba(255, 36, 78, 0.65), 2px 0 0 rgba(0, 232, 255, 0.65),
+    0 2px 4px rgba(0, 0, 0, 0.55);
+}
+
+.theme-act2-bleed .tcd-icon-label {
+  text-shadow: -1px 0 rgba(255, 40, 80, 0.7), 1px 0 rgba(0, 235, 255, 0.7);
+}
+
+.tcd-desktop-icon.icon-alert .tcd-icon-box {
+  background: #8f1822;
+  color: #ffffff;
+  border-color: #ff6b78;
+  animation: auditIconPulse 1s steps(2, start) infinite;
+}
+
+@keyframes auditIconPulse {
+  50% {
+    background: #d92638;
+  }
+}
+
+.tcd-icon-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.theme-act3-fairytale .tcd-icon-label {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.tcd-icon-code {
+  font-size: 9.5px;
+  opacity: 0.85;
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   CLASSIC 3D BEVELED RETRO WINDOWS + MAXIMIZE + DRAG-TO-RESIZE HANDLES
+   ========================================================================== */
+
+.tcd-win {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--os-chrome);
+  color: var(--os-ink);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: inset 1px 1px 0 var(--os-chrome-mid),
+    inset -1px -1px 0 var(--os-chrome-shadow),
+    4px 5px 0 rgba(0, 0, 0, 0.45);
+  padding: 3px;
+  overflow: hidden;
+  transition: transform 0.75s cubic-bezier(0.55, 0.06, 0.68, 0.19), opacity 0.65s ease;
+}
+
+.tcd-win.tcd-win-maximized {
+  box-shadow: none;
+  padding: 2px;
+}
+
+.tcd-win.tcd-win-corrupted {
+  background: #1c0b0e;
+  color: #f2dce0;
+  border-color: #c9303e;
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.85);
+}
+
+.tcd-win-titlebar {
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 5px 0 7px;
+  margin-bottom: 3px;
+  background: var(--os-title-inactive-bg);
+  color: var(--os-title-inactive-ink);
+  cursor: grab;
+}
+
+.tcd-win-titlebar:active {
+  cursor: grabbing;
+}
+
+.tcd-win-active .tcd-win-titlebar {
+  background: var(--os-title-active-bg);
+  color: var(--os-title-active-ink);
+}
+
+.tcd-win-corrupted .tcd-win-titlebar,
+.tcd-win-corrupted.tcd-win-active .tcd-win-titlebar {
+  background: #8f1822;
+  color: #ffffff;
+}
+
+.tcd-win-title-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.tcd-win-title {
+  flex: 1;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.3px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+.tcd-win-controls {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tcd-win-ctrl-btn {
+  width: 21px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--os-chrome);
+  color: #111111;
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.tcd-win-ctrl-btn:active {
+  border-top-color: var(--os-chrome-dark);
+  border-left-color: var(--os-chrome-dark);
+  border-right-color: var(--os-chrome-light);
+  border-bottom-color: var(--os-chrome-light);
+}
+
+.tcd-win-ctrl-btn.tcd-win-close:hover {
+  background: #c92434;
+  color: #ffffff;
+}
+
+.tcd-win-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--os-pane-bg);
+  color: var(--os-ink);
+  border-top: 2px solid var(--os-chrome-shadow);
+  border-left: 2px solid var(--os-chrome-shadow);
+  border-right: 2px solid var(--os-chrome-light);
+  border-bottom: 2px solid var(--os-chrome-light);
+  position: relative;
+}
+
+.tcd-win-corrupted .tcd-win-body {
+  background: #14080a;
+  color: #f2dce0;
+  border-color: #6e1c24;
+}
+
+/* Drag-to-Resize Handles */
+.tcd-resize-e {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  bottom: 14px;
+  width: 6px;
+  cursor: ew-resize;
+  z-index: 15;
+}
+
+.tcd-resize-s {
+  position: absolute;
+  left: 6px;
+  right: 14px;
+  bottom: 0;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 15;
+}
+
+.tcd-resize-se {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 15px;
+  height: 15px;
+  cursor: nwse-resize;
+  z-index: 16;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 2px,
+    var(--os-chrome-shadow) 2px,
+    var(--os-chrome-shadow) 3px,
+    var(--os-chrome-light) 3px,
+    var(--os-chrome-light) 4px
+  );
+}
+
+/* ==========================================================================
+   TASKBAR & START MENU (CLASSIC WIN 3.1 / 95 RAISED BEVEL)
+   ========================================================================== */
+
+.tcd-taskbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  background: var(--os-chrome);
+  border-top: 2px solid var(--os-chrome-light);
+  color: var(--os-ink);
+  transition: transform 0.8s ease, opacity 0.6s ease;
+}
+
+.tcd-start-btn {
+  height: 25px;
+  padding: 0 11px;
+  background: var(--os-chrome);
+  color: var(--os-ink);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.tcd-start-btn:hover,
+.tcd-start-btn.active {
+  border-top-color: var(--os-chrome-dark);
+  border-left-color: var(--os-chrome-dark);
+  border-right-color: var(--os-chrome-light);
+  border-bottom-color: var(--os-chrome-light);
+  background: var(--os-chrome-mid);
+}
+
+.tcd-task-tabs {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+}
+
+.tcd-task-tab {
+  height: 24px;
+  padding: 0 10px;
+  background: var(--os-chrome);
+  color: var(--os-ink);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tcd-task-tab.active {
+  background: var(--os-pane-alt);
+  font-weight: 700;
+  border-top-color: var(--os-chrome-dark);
+  border-left-color: var(--os-chrome-dark);
+  border-right-color: var(--os-chrome-light);
+  border-bottom-color: var(--os-chrome-light);
+}
+
+.tcd-task-tray {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 2px 7px;
+  background: var(--os-chrome-mid);
+  border-top: 1.5px solid var(--os-chrome-shadow);
+  border-left: 1.5px solid var(--os-chrome-shadow);
+  border-right: 1.5px solid var(--os-chrome-light);
+  border-bottom: 1.5px solid var(--os-chrome-light);
+}
+
+.tcd-tray-op {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--os-accent);
+}
+
+.tcd-tray-op.corrupted {
+  color: #c91229;
+}
+
+.tcd-tray-op.model-star {
+  color: #1d6fc4;
+}
+
+.tcd-tray-btn {
+  height: 20px;
+  padding: 0 7px;
+  background: var(--os-chrome);
+  color: var(--os-ink);
+  border-top: 1.5px solid var(--os-chrome-light);
+  border-left: 1.5px solid var(--os-chrome-light);
+  border-right: 1.5px solid var(--os-chrome-dark);
+  border-bottom: 1.5px solid var(--os-chrome-dark);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.tcd-tray-btn:hover {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.tcd-tray-clock {
+  color: var(--os-ink);
+  font-weight: 700;
+  min-width: 48px;
+  text-align: right;
+}
+
+.tcd-start-menu {
+  position: absolute;
+  left: 6px;
+  bottom: 36px;
+  width: 265px;
+  z-index: 85;
+  background: var(--os-chrome);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+}
+
+.tcd-start-head {
+  padding: 6px 9px;
+  background: var(--os-title-active-bg);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tcd-start-item {
+  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--os-ink);
+  font-size: 12px;
+  text-align: left;
+}
+
+.tcd-start-item:hover {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.tcd-start-sep {
+  height: 1px;
+  background: var(--os-chrome-shadow);
+  border-bottom: 1px solid var(--os-chrome-light);
+  margin: 3px 2px;
+}
+
+/* ==========================================================================
+   COMMON RETRO CONTROLS (HIGH-CONTRAST LIGHT INNER PANES)
+   ========================================================================== */
+
+.os-retro-btn {
+  padding: 6px 14px;
+  background: var(--os-chrome);
+  color: #111111;
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.os-retro-btn:hover:not(:disabled) {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.os-retro-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.os-btn-primary {
+  background: var(--os-accent);
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.os-btn-primary:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.os-btn-stamped {
+  background: var(--os-pane-alt);
+  color: var(--os-accent);
+  border: 1.5px dashed var(--os-accent);
+}
+
+.os-btn-danger,
+.os-btn-danger-sm {
+  background: #a81524;
+  color: #ffffff;
+  border-top: 2px solid #f08a94;
+  border-left: 2px solid #f08a94;
+  border-right: 2px solid #520810;
+  border-bottom: 2px solid #520810;
+}
+
+.os-btn-danger:hover,
+.os-btn-danger-sm:hover {
+  background: #cc1d2f;
+  color: #ffffff;
+}
+
+.os-btn-danger-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.os-cell-alert {
+  color: #c21628;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   APP 1: INTRANET.EXE
+   ========================================================================== */
+
+.os-intranet {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--os-pane-bg);
+}
+
+.os-intranet-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 11px;
+  background: var(--os-chrome);
+  border-bottom: 1.5px solid var(--os-chrome-shadow);
+}
+
+.os-addr-box {
+  padding: 4px 8px;
+  background: #ffffff;
+  color: #222222;
+  border-top: 1.5px solid var(--os-chrome-shadow);
+  border-left: 1.5px solid var(--os-chrome-shadow);
+  border-right: 1.5px solid var(--os-chrome-light);
+  border-bottom: 1.5px solid var(--os-chrome-light);
+  font-size: 11.5px;
+}
+
+.os-tab-strip {
+  display: flex;
+  gap: 6px;
+}
+
+.os-tab-btn {
+  padding: 4px 12px;
+  background: var(--os-chrome-mid);
+  color: #111111;
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.os-tab-btn.active {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.os-intranet-content {
+  padding: 13px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  position: relative;
+  flex: 1;
+}
+
+.os-banner-box {
+  padding: 10px 12px;
+  border: 1.5px solid var(--os-border-inner);
+  background: var(--os-pane-alt);
+}
+
+.os-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--os-ink);
+}
+
+.os-banner-meta {
+  font-size: 11.5px;
+  color: var(--os-accent);
+  font-weight: 700;
+  margin-top: 3px;
+}
+
+.os-notice-article {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--os-ink);
+}
+
+.os-drift-note {
+  color: #b8251e;
+  font-weight: 700;
+}
+
+.os-muted-line {
+  font-size: 11.5px;
+  color: var(--os-ink-dim);
+  border-top: 1px dashed var(--os-border-inner);
+  padding-top: 7px;
+}
+
+.os-notice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.os-hr-breadcrumb {
+  font-size: 11.5px;
+  color: var(--os-ink-dim);
+  border-bottom: 1px solid var(--os-border-inner);
+  padding-bottom: 5px;
+}
+
+.os-hr-form-card {
+  padding: 12px 14px;
+  border: 1.5px solid var(--os-border-inner);
+  background: var(--os-pane-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.os-form-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  border-bottom: 1px dotted var(--os-border-inner);
+  padding-bottom: 5px;
+}
+
+.os-retention-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px;
+  background: var(--os-pane-bg);
+  border: 1px dashed var(--os-border-inner);
+  color: var(--os-ink);
+}
+
+.os-hr-warning-strip {
+  padding: 6px 10px;
+  background: #ffe0e5;
+  border-left: 3px solid #c91229;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #8f0d1e;
+}
+
+.os-hr-submit-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.os-evade-arena {
+  width: 100%;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.os-evade-btn {
+  transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.os-hr-hint {
+  font-size: 11.5px;
+  color: var(--os-ink-dim);
+  text-align: center;
+}
+
+.os-hint-crimson {
+  color: #b51226;
+  font-weight: 700;
+}
+
+.os-hold-wrap {
+  width: 100%;
+}
+
+.os-hold-wrap.os-hold-tremble {
+  animation: physicalTremble 0.09s infinite;
+}
+
+.os-btn-hold {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  padding: 11px 16px;
+  background: #2b0a0e;
+  color: #ffffff;
+  border: 2px solid #c92434;
+  touch-action: none;
+}
+
+.os-hold-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #85121d 0%, #d92638 100%);
+  transition: width 0.05s linear;
+  z-index: 0;
+}
+
+.os-hold-label {
+  position: relative;
+  z-index: 1;
+}
+
+.os-rejection-box {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-top: 1.5px solid #c92434;
+  padding-top: 9px;
+}
+
+.os-rejection-err {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #8f1420;
+  padding: 7px 10px;
+  border-left: 4px solid #ff4d5e;
+}
+
+.os-rejection-thought {
+  font-family: var(--font-serif-doc);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--os-ink);
+}
+
+.os-inline-dialog {
+  padding: 12px;
+  background: var(--os-chrome);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.os-inline-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--os-accent);
+  border-bottom: 1px solid var(--os-chrome-shadow);
+  padding-bottom: 4px;
+}
+
+.os-inline-dialog-quote {
+  font-family: var(--font-serif-doc);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #111111;
+}
+
+.os-retro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.os-retro-table th,
+.os-retro-table td {
+  padding: 7px 10px;
+  border: 1px solid var(--os-border-inner);
+  text-align: left;
+}
+
+.os-retro-table th {
+  background: var(--os-chrome);
+  color: #111111;
+}
+
+/* ==========================================================================
+   APP 2 & 3: MY_DOCS & PICTURES SPLIT EXPLORER
+   ========================================================================== */
+
+.os-split-explorer {
+  display: grid;
+  grid-template-columns: 215px 1fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.os-file-sidebar {
+  border-right: 1.5px solid var(--os-border-inner);
+  background: var(--os-pane-alt);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.os-sidebar-head {
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--os-accent);
+  background: var(--os-chrome);
+  border-bottom: 1px solid var(--os-chrome-shadow);
+}
+
+.os-file-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.os-file-item {
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dotted var(--os-border-inner);
+  color: var(--os-ink);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.os-file-item:hover {
+  background: rgba(0, 0, 128, 0.08);
+}
+
+.os-file-item.selected {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.os-file-item.selected .os-file-meta {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.os-file-name {
+  font-size: 12px;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.os-file-meta {
+  font-size: 10.5px;
+  color: var(--os-ink-dim);
+}
+
+.os-doc-viewer {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--os-pane-bg);
+}
+
+.os-viewer-toolbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background: var(--os-chrome-mid);
+  border-bottom: 1px solid var(--os-border-inner);
+  font-size: 11px;
+  font-weight: 700;
+  color: #222222;
+}
+
+.os-doc-pre {
+  flex: 1;
+  padding: 13px 15px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--os-ink);
+}
+
+.os-pic-viewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: #141414;
+  overflow: auto;
+}
+
+.os-pixel-svg {
+  width: 100%;
+  max-width: 460px;
+  height: auto;
+  border: 2px solid var(--os-chrome-shadow);
+  image-rendering: pixelated;
+}
+
+.os-pic-evidence-wrap {
+  width: 100%;
+  max-width: 430px;
+}
+
+/* ==========================================================================
+   APP 4: CALC.EXE & NOTEPAD.EXE
+   ========================================================================== */
+
+.os-calc {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  background: var(--os-chrome);
+}
+
+.os-calc-screen {
+  background: #ffffff;
+  border-top: 2px solid var(--os-chrome-shadow);
+  border-left: 2px solid var(--os-chrome-shadow);
+  border-right: 2px solid var(--os-chrome-light);
+  border-bottom: 2px solid var(--os-chrome-light);
+  padding: 8px 12px;
+  text-align: right;
+}
+
+.os-calc-screen.calc-glitched {
+  border-color: #c91229;
+  background: #2b080c;
+}
+
+.os-calc-status {
+  font-size: 10.5px;
+  color: #555555;
+  text-align: left;
+  font-weight: 700;
+}
+
+.os-calc-screen.calc-glitched .os-calc-status {
+  color: #ff7b88;
+}
+
+.os-calc-digits {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #111111;
+}
+
+.os-calc-screen.calc-glitched .os-calc-digits {
+  color: #ffccd2;
+}
+
+.os-calc-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.os-calc-btn {
+  background: var(--os-chrome-mid);
+  color: #111111;
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.os-calc-btn:hover {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.os-calc-btn.zero {
+  grid-column: span 2;
+}
+
+.os-calc-btn.eq {
+  background: var(--os-accent);
+  color: #ffffff;
+}
+
+.os-notepad {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.os-notepad-menu {
+  display: flex;
+  gap: 14px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  background: var(--os-chrome);
+  border-bottom: 1px solid var(--os-chrome-shadow);
+  color: #111111;
+  font-weight: 700;
+}
+
+.os-notepad-area {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 12px 14px;
+  background: var(--os-pane-bg);
+  color: var(--os-ink);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+  user-select: text;
+}
+
+.os-notepad-area.ghost-active {
+  color: #a81022;
+}
+
+/* ==========================================================================
+   APP 5: RECYCLE.BIN & C:\302 SYSTEM MONITOR
+   ========================================================================== */
+
+.os-recycle {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.os-recycle-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  background: var(--os-chrome);
+  border-bottom: 1.5px solid var(--os-chrome-shadow);
+  color: #111111;
+}
+
+.os-modal-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 20;
+}
+
+.os-error-dialog {
+  width: 100%;
+  max-width: 420px;
+  background: var(--os-chrome);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.7);
+  color: #111111;
+}
+
+.os-error-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 9px;
+  background: #a81524;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.os-error-titlebar button {
+  background: var(--os-chrome);
+  color: #111111;
+  border: 1px solid #111111;
+  width: 18px;
+  height: 18px;
+  font-weight: 700;
+}
+
+.os-error-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  font-size: 12.5px;
+}
+
+.os-error-code {
+  font-weight: 700;
+  color: #ffffff;
+  background: #8f1420;
+  padding: 7px 10px;
+  border: 1px solid #4a070d;
+}
+
+.os-sysmon {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.os-sysmon-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--os-accent);
+  border-bottom: 1.5px solid var(--os-border-inner);
+  padding-bottom: 5px;
+}
+
+.os-observer-alert {
+  padding: 9px 12px;
+  background: #8f1420;
+  border: 2px solid #ff4d5e;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  animation: auditIconPulse 1.4s steps(2, start) infinite;
+}
+
+.os-sysmon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.os-sysmon-box {
+  padding: 10px 12px;
+  background: var(--os-pane-alt);
+  border: 1px solid var(--os-border-inner);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.os-sysmon-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--os-accent);
+  margin-bottom: 2px;
+}
+
+.os-sysmon-line {
+  font-size: 12px;
+}
+
+.os-meter-row {
+  display: grid;
+  grid-template-columns: 155px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.os-meter-track {
+  height: 12px;
+  background: #ffffff;
+  border: 1px solid var(--os-border-inner);
+}
+
+.os-meter-fill {
+  height: 100%;
+  background: var(--os-accent);
+}
+
+.os-meter-fill.awareness {
+  background: #c91229;
+}
+
+/* ==========================================================================
+   APP 6: AUDIT_302.EXE (ACT 4 INTERROGATION + PONY ISLAND REACTIVE UI)
+   ========================================================================== */
+
+.os-audit {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  min-height: 100%;
+  background: #14080a;
+  color: #f2dce0;
+}
+
+.os-audit-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ff8590;
+  border-bottom: 1px solid #751f27;
+  padding-bottom: 6px;
+}
+
+.os-audit-log {
+  padding: 10px 12px;
+  background: #0d0506;
+  border: 1px solid #6e1c24;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.os-audit-query {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #ffffff;
+}
+
+.os-audit-hint {
+  font-size: 11.5px;
+  color: #e6a3aa;
+}
+
+.os-audit-options {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.os-audit-opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: #1f0c0f;
+  color: #f7e4e6;
+  border: 1.5px solid #8c2a33;
+  text-align: left;
+  font-size: 13px;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.os-audit-opt-btn:hover {
+  background: #3b1319;
+  border-color: #ff6b78;
+}
+
+.os-opt-code {
+  font-weight: 700;
+  color: #ff8590;
+  min-width: 20px;
+}
+
+.os-opt-redacted-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #050505;
+  padding: 2px 8px;
+  border: 1px dashed #6e6558;
+}
+
+.os-ink-blocks {
+  color: #1c1a18;
+  background: #0b0a09;
+  letter-spacing: 1px;
+}
+
+.os-scratch-badge {
+  font-size: 11px;
+  color: #dfd7c8;
+  font-weight: 700;
+}
+
+.os-audit-opt-btn.opt-purged-err {
+  border-style: dashed;
+  border-color: #ff2e43;
+}
+
+.os-purged-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ff4d5e;
+}
+
+.os-fourthwall-body {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 14px;
+  background: #080203;
+  border: 1px solid #9e2832;
+}
+
+.os-fourthwall-lead {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ff6b78;
+}
+
+.os-fourthwall-text {
+  font-family: var(--font-serif-doc);
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: #ffffff;
+}
+
+.os-fourthwall-sub {
+  font-size: 12px;
+  color: #d49ca1;
+}
+
+/* Branch A Inside AUDIT_302 */
+.os-audit-prompt-strip,
+.os-audit-cue-strip {
+  padding: 7px 10px;
+  font-size: 12px;
+  background: #1b1614;
+  border-left: 3px solid #d4c39e;
+  color: #f0e8d8;
+}
+
+.os-branch-a-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.os-branch-a-row {
+  padding: 10px 12px;
+  background: #ebe4d5;
+  color: #171512;
+  border: 1px solid #8c8273;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.os-branch-a-row:hover:not(:disabled) {
+  background: #dcd3c1;
+}
+
+.os-branch-a-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7a1820;
+}
+
+.os-branch-a-text-wrap {
+  position: relative;
+  font-family: var(--font-serif-doc);
+  font-size: 13.5px;
+}
+
+.os-branch-a-ink {
+  position: absolute;
+  inset: -1px -3px;
+  background: #12100e;
+  color: #dfd7c8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.os-branch-a-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.os-branch-a-final-text {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.os-branch-a-final-text blockquote {
+  font-family: var(--font-serif-doc);
+  font-size: 13.5px;
+  line-height: 1.65;
+  background: #ebe4d5;
+  color: #171512;
+  padding: 10px 12px;
+  border-left: 3px solid #171512;
+}
+
+.os-sys-ok {
+  font-size: 12px;
+  font-weight: 700;
+  color: #d4c39e;
+}
+
+.os-new-shift-line {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 8px;
+  background: #24201b;
+  border: 1px solid #8c8273;
+  color: #f0e8d8;
+}
+
+.os-epilogue {
+  font-size: 11.5px;
+  color: #b5aa98;
+}
+
+/* ==========================================================================
+   BRANCH B: 3-STAGE OS SKIN PEELING (peelStage 0 -> 3) & BARE MATRIX
+   ========================================================================== */
+
+.peel-drop-1 {
+  transform: translateY(52px) rotate(-3deg);
+  opacity: 0.72;
+}
+
+.peel-drop-2 {
+  transform: translateY(310px) rotate(7deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tcd-bare-matrix-underlayer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #020202;
+  color: #ebd5d7;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.tcd-bare-matrix-underlayer.matrix-fully-exposed {
+  z-index: 88;
+}
+
+.matrix-top-bar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ff5c6c;
+  border-bottom: 1px dashed #6e1c24;
+  padding-bottom: 7px;
+}
+
+.matrix-desc {
+  font-size: 12.5px;
+  color: #b58d91;
+}
+
+.matrix-split {
+  display: grid;
+  grid-template-columns: 1fr 250px;
+  gap: 18px;
+  align-items: start;
+}
+
+.matrix-tree-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.matrix-pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: #e6c5c8;
+  white-space: pre-wrap;
+}
+
+.matrix-quote {
+  font-family: var(--font-serif-doc);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #ffffff;
+  border-left: 2px solid #c92838;
+  padding-left: 12px;
+}
+
+.matrix-cursor-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff4d5e;
+}
+
+.matrix-blink-block {
+  display: inline-block;
+  width: 9px;
+  height: 15px;
+  background: #ff4d5e;
+  animation: cursorBlink 0.9s steps(2, start) infinite;
+}
+
+.matrix-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ==========================================================================
+   TEMPORARY TOP-RIGHT ACT STAGE JUMP BAR & ACT 3 CLEAN SUNNY CONTROLS
+   ========================================================================== */
+.os-temp-stage-bar {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--os-chrome);
+  border-top: 2px solid var(--os-chrome-light);
+  border-left: 2px solid var(--os-chrome-light);
+  border-right: 2px solid var(--os-chrome-dark);
+  border-bottom: 2px solid var(--os-chrome-dark);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.38);
+}
+
+.os-temp-stage-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--os-ink-dim);
+  padding: 0 4px 0 2px;
+}
+
+.os-temp-stage-btn {
+  padding: 2px 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--os-pane-bg);
+  color: var(--os-ink);
+  border-top: 1.5px solid var(--os-chrome-light);
+  border-left: 1.5px solid var(--os-chrome-light);
+  border-right: 1.5px solid var(--os-chrome-dark);
+  border-bottom: 1.5px solid var(--os-chrome-dark);
+}
+
+.os-temp-stage-btn:hover {
+  background: var(--os-chrome-mid);
+}
+
+.os-temp-stage-btn.active {
+  background: var(--os-accent);
+  color: #ffffff;
+  border-color: var(--os-chrome-dark);
+}
+
+.os-optimal-banner {
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #e8f5ff;
+  color: #14549c;
+  border: 1.5px solid #5aa4eb;
+}
+
+.os-info-dialog {
+  padding: 12px 14px;
+  background: var(--os-pane-alt);
+  border: 1.5px solid var(--os-accent);
+  color: var(--os-ink);
+  font-size: 12.5px;
+}
+
+.os-info-code {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--os-accent);
+}
+
+.os-hr-sunny-strip {
+  padding: 6px 10px;
+  background: #e7f4ff;
+  border-left: 3px solid #2b8be6;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #144d8a;
+}
+
+.os-hint-sunny {
+  color: #1d6fc4;
+  font-weight: 700;
+}
+
+.os-btn-hold-sunny {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  padding: 11px 16px;
+  background: #eaf4ff;
+  color: #14365c;
+  border: 2px solid #2b8be6;
+  touch-action: none;
+}
+
+.os-hold-fill-sunny {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #5cb8ff 0%, #f2b749 100%);
+  transition: width 0.05s linear;
+  z-index: 0;
+}
+
+.os-sunny-complete-box {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-top: 1.5px solid #5aa4eb;
+  padding-top: 9px;
+}
+
+.os-sunny-complete-banner {
+  font-size: 12px;
+  font-weight: 700;
+  color: #144d8a;
+  background: #e7f4ff;
+  padding: 7px 10px;
+  border-left: 4px solid #2b8be6;
+}
+
+.os-sunny-complete-note {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--os-ink);
+}

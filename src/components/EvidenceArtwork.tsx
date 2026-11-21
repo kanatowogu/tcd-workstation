@@ -112,15 +112,15 @@ const SvgPhotoInitial: React.FC<{ lang: Language }> = ({ lang }) => (
       strokeDasharray="2,2"
     />
 
-    {/* Left Figure: Clerk #302 Warm Monochrome Silhouette */}
+    {/* Left Figure: #209 ID-Sticker Cutout (NOT #302 — only 3 in frame) */}
     <circle cx="105" cy="82" r="20" fill="#8c8273" opacity="0.88" />
     <path d="M 74 184 C 74 130, 136 130, 136 184 Z" fill="#6b6356" opacity="0.95" />
-    <rect x="86" y="138" width="18" height="10" fill="#dfd7c8" opacity="0.9" />
-    <text x="88" y="146" fill="#1c1a17" fontSize="6.5" fontFamily="monospace" fontWeight="bold">
-      302
+    <rect x="86" y="138" width="20" height="10" fill="#dfd7c8" opacity="0.9" />
+    <text x="88" y="146" fill="#1c1a17" fontSize="6" fontFamily="monospace" fontWeight="bold">
+      #209
     </text>
 
-    {/* Center Figure: "Wife" Silhouette */}
+    {/* Center Figure: C-14 Apron Cutout */}
     <circle cx="184" cy="86" r="19" fill="#998e7e" opacity="0.85" />
     <path d="M 154 184 C 156 134, 212 134, 214 184 Z" fill="#786f61" opacity="0.9" />
     <path
@@ -129,10 +129,10 @@ const SvgPhotoInitial: React.FC<{ lang: Language }> = ({ lang }) => (
       stroke="#cfc6b6"
       strokeWidth="1"
       strokeDasharray="2,2"
-      opacity="0.65"
+      opacity="0.7"
     />
 
-    {/* Right Figure: "Daughter" Cutout Silhouette */}
+    {/* Right Figure: M-04 Missing Child Cutout */}
     <circle cx="256" cy="106" r="15" fill="#a69b8a" opacity="0.85" />
     <path d="M 233 184 C 235 146, 277 146, 279 184 Z" fill="#827869" opacity="0.9" />
 
@@ -144,7 +144,7 @@ const SvgPhotoInitial: React.FC<{ lang: Language }> = ({ lang }) => (
       height="154"
       transform="rotate(-2 142 105)"
       fill="#e6dec8"
-      opacity="0.28"
+      opacity="0.32"
       stroke="#d4c8ab"
       strokeWidth="0.7"
     />
@@ -155,7 +155,7 @@ const SvgPhotoInitial: React.FC<{ lang: Language }> = ({ lang }) => (
       height="140"
       transform="rotate(3 221 112)"
       fill="#e6dec8"
-      opacity="0.28"
+      opacity="0.32"
       stroke="#d4c8ab"
       strokeWidth="0.7"
     />
@@ -167,20 +167,20 @@ const SvgPhotoInitial: React.FC<{ lang: Language }> = ({ lang }) => (
     {/* Top Archival Label inside Photo */}
     <text x="60" y="38" fill="#cfc6b6" fontSize="7.5" fontFamily="monospace" opacity="0.85">
       {lang === 'zh'
-        ? '档案相片：Family_Photo.jpg [第4节班前锚定证物]'
-        : 'FILE: Family_Photo.jpg [GROUNDING ASSET #1]'}
+        ? '档案相片：Family_Photo.jpg [仅3人入镜 // #209·C-14·M-04]'
+        : 'FILE: Family_Photo.jpg [3 SUBJECTS: #209 · C-14 · M-04]'}
     </text>
 
     {/* Handwritten Charcoal Notes on Polaroid Bottom Border */}
-    <text x="56" y="207" fill="#211e1a" fontSize="10" fontFamily="serif" fontWeight="bold">
+    <text x="56" y="207" fill="#211e1a" fontSize="9.5" fontFamily="serif" fontWeight="bold">
       {lang === 'zh'
-        ? '“我的妻子。我的女儿。我们要一直在一起。”'
-        : '"MY WIFE. MY DAUGHTER. STAY TOGETHER."'}
+        ? '“三个人都在照片里……等等，那我在哪？”'
+        : '"THREE FACES TAPED TOGETHER — WHERE AM I?"'}
     </text>
     <text x="58" y="224" fill="#595247" fontSize="8" fontFamily="monospace">
       {lang === 'zh'
-        ? '《员工心理健康手册》第4节 —— 5秒视觉锚定 [核验正常]'
-        : 'WELLNESS PAMPHLET SEC. 4 — 5s VISUAL ANCHOR [VERIFIED]'}
+        ? '《心理手册》第4节 —— 仅含 3 枚证件贴纸 [未见 #302]'
+        : 'WELLNESS SEC. 4 — 3 ID STICKERS ONLY [#302 ABSENT]'}
     </text>
   </svg>
 );
@@ -419,16 +419,20 @@ const SvgPhotoTruth: React.FC<{ lang: Language }> = ({ lang }) => (
       <rect x="238" y="147" width="4" height="9.5" fill="#4a070d" />
     </g>
 
+    {/* Yellowing Masking Tape Strips on Stapled Truth Collage */}
+    <polygon points="24,38 72,18 79,30 31,50" fill="#dfd2ad" opacity="0.62" stroke="#9e906c" strokeWidth="0.7" />
+    <polygon points="282,168 330,148 336,160 288,180" fill="#dfd2ad" opacity="0.58" stroke="#9e906c" strokeWidth="0.7" />
+
     {/* Bottom Caption */}
     <text x="28" y="206" fill="#e06670" fontSize="9" fontFamily="monospace" fontWeight="bold">
       {lang === 'zh'
-        ? '证物 #3：Photo_Truth.png —— 3号档案柜内用订书钉钉死的拼贴物'
-        : 'EVIDENCE #3: Photo_Truth.png — STAPLED REMAINS IN CABINET #3'}
+        ? '证物 #3：Photo_Truth.png —— 仅含 3 人：#209 + C-14 + M-04'
+        : 'EVIDENCE #3: Photo_Truth.png — 3 SUBJECTS BOUND (#302 NOT IN FRAME)'}
     </text>
     <text x="28" y="222" fill="#b87a7e" fontSize="7.5" fontFamily="monospace">
       {lang === 'zh'
-        ? '#209 染血工牌 + C-14 保洁围裙残片 + M-04 失踪女童传单'
-        : '#209 ID BADGE + C-14 BLOODIED APRON TAG + M-04 MISSING CHILD FLYER'}
+        ? '#209 Arthur 工牌 + C-14 林氏围裙名牌 + M-04 寻人传单（订书钉与胶带封存）'
+        : '#209 ARTHUR ID + C-14 LIN APRON TAG + M-04 MISSING GIRL (STAPLED & TAPED)'}
     </text>
   </svg>
 );

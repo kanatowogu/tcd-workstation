@@ -192,7 +192,7 @@ export const EXPANDED_SCRIPT_ITEMS_4_5: Record<Language, ExpandedItem4And5Assets
           description:
             '一张用两道泛黄透明胶带贴在监视器左下角的即时显影照片。强曝光让三个人的五官略微模糊，但暖色调让人觉得安心。',
           subtitleLines: [
-            '妻子、女儿，还有我。照片虽然有点褪色，看着还是踏实。',
+            '照片里整整齐齐贴着三个人……等等，左边那人怎么有点像 Arthur？那我在哪？',
             '等发了这个月的夜班津贴，周末带她们去城西公园再拍一张。',
             '胶带边角有点翘起来了，抽空换两条新的粘牢。',
           ],
@@ -415,7 +415,7 @@ export const EXPANDED_SCRIPT_ITEMS_4_5: Record<Language, ExpandedItem4And5Assets
           description:
             'An instant photograph taped to the lower-left bezel with two strips of yellowed tape. Overexposure blurs the faces, though the warm tone feels steady.',
           subtitleLines: [
-            'My wife, my daughter, and me. Faded a bit, still keeps me grounded.',
+            'Three faces neatly taped together... wait—if that is Arthur, Lin, and the girl, where am I?',
             'Once the night stipend clears, we should take a sharper one at West Park.',
             'Tape corners are curling. Need fresh strips before it drops.',
           ],

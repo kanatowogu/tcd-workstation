@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, ThreeEvent, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { FocusTarget, Language, RedactTargetId } from '../types';
+import { ActStage, DeskFileId, FocusTarget, Language } from '../types';
 import {
+  createBasementTileTexture,
+  createConcreteWallTexture,
   createMonitorScreenCanvasTexture,
   createNameplateTexture,
   createPartitionGlassTexture,
@@ -10,45 +12,98 @@ import {
 } from '../utils/canvasTextures';
 import {
   CoffeeMugMesh,
+  DeskCalendarMesh,
+  DeskClutterGroup,
   DossierFolderMesh,
+  FilingCabinetMesh,
   InteractableProp,
   LunchboxMesh,
   ManualBookletMesh,
   PolaroidPhotoMesh,
+  TapeRecorderMesh,
+  VintageDeskLampMesh,
 } from './InteractableProp';
 
 interface DeskSceneProps {
   lang: Language;
+  actStage: ActStage;
   focusTarget: FocusTarget;
-  quotaCount: number;
-  redactedTargets: RedactTargetId[];
-  file03Decrypted: boolean;
-  file04Delivered: boolean;
-  file05Delivered: boolean;
   lensBroken: boolean;
   endingChoice: 'A' | 'B' | null;
   endingARedactedCount: number;
   brightness: number;
+  drawerLocks: [boolean, boolean, boolean];
+  openDrawers: [boolean, boolean, boolean];
+  isTapePlaying: boolean;
+  isDeskLampOn: boolean;
+  activeDeskFiles: DeskFileId[];
+  screenOverlayRef: React.RefObject<HTMLDivElement>;
   onSelectFocus: (target: FocusTarget) => void;
+  onDeskFileClick: (fileId: DeskFileId) => void;
+  onToggleDrawer: (index: 0 | 1 | 2) => void;
+  onLockedDrawerRattle: (index: 1 | 2) => void;
+  onInspectDrawerFolder: (fileId: DeskFileId) => void;
+  onToggleTape: () => void;
+  onInspectPlant: () => void;
+  onToggleDeskLamp: () => void;
+  onInspectCalendar: () => void;
+  onHoverPropChange: (label: string | null) => void;
 }
 
+// World-space constants for the CRT screen plane (centered on monitor front face)
+const MONITOR_GROUP_POS: [number, number, number] = [0, 0.76, -0.18];
+const SCREEN_LOCAL_Y = 0.435;
+const SCREEN_LOCAL_Z = 0.158;
+const SCREEN_WORLD_Y = MONITOR_GROUP_POS[1] + SCREEN_LOCAL_Y; // 1.195
+const SCREEN_WORLD_Z = MONITOR_GROUP_POS[2] + SCREEN_LOCAL_Z; // -0.022
+const SCREEN_W = 0.78;
+const SCREEN_H = 0.46;
+
+const CRT_VIRTUAL_W = 1024;
+const CRT_VIRTUAL_H = 604;
+
 /* ============================================================================
-   CAMERA CONTROLLER: SMOOTH DOLLY + ±3° BREATHING SWAY
+   CAMERA CONTROLLER: 80–85% CRT VIEWPORT TAKEOVER + EXACT 3D HOMOGRAPHY
    ============================================================================ */
-const CameraController: React.FC<{ focusTarget: FocusTarget }> = ({ focusTarget }) => {
-  const targetPos = useMemo(() => new THREE.Vector3(0, 1.48, 2.15), []);
+const CameraController: React.FC<{
+  focusTarget: FocusTarget;
+  screenOverlayRef: React.RefObject<HTMLDivElement>;
+}> = ({ focusTarget, screenOverlayRef }) => {
+  const targetPos = useMemo(() => new THREE.Vector3(0, 1.48, 2.12), []);
   const currentLookAt = useMemo(() => new THREE.Vector3(0, 1.06, -0.15), []);
   const desiredLookAt = useMemo(() => new THREE.Vector3(0, 1.06, -0.15), []);
+  const tlVec = useMemo(() => new THREE.Vector3(), []);
+  const trVec = useMemo(() => new THREE.Vector3(), []);
+  const blVec = useMemo(() => new THREE.Vector3(), []);
+  const brVec = useMemo(() => new THREE.Vector3(), []);
 
   useFrame((state, delta) => {
-    const speed = Math.min(1, delta * 5.5);
-    // ±3° (~0.052 rad) subtle mouse breathing sway
+    const speed = Math.min(1, delta * 5.8);
     const swayX = state.pointer.x * 0.075;
     const swayY = state.pointer.y * 0.048;
 
     if (focusTarget === 'monitor') {
-      targetPos.set(swayX * 0.18, 1.21 + swayY * 0.15, 0.58);
-      desiredLookAt.set(swayX * 0.1, 1.19 + swayY * 0.1, -0.25);
+      const fovRad =
+        ((state.camera as THREE.PerspectiveCamera).fov * Math.PI) / 180;
+      const halfTan = Math.tan(fovRad / 2);
+      const aspect = state.size.width / Math.max(1, state.size.height);
+
+      // Compute distance so CRT screen fills ~80–84% of viewport while keeping
+      // slim plastic bezel, power LED, nameplate, and desk edge visible
+      const distV = SCREEN_H / 0.805 / (2 * halfTan);
+      const distH = SCREEN_W / 0.84 / (2 * halfTan * aspect);
+      const dist = Math.max(distV, distH);
+
+      targetPos.set(
+        swayX * 0.02,
+        SCREEN_WORLD_Y - 0.024 + swayY * 0.015,
+        SCREEN_WORLD_Z + dist
+      );
+      desiredLookAt.set(
+        swayX * 0.012,
+        SCREEN_WORLD_Y - 0.024 + swayY * 0.012,
+        SCREEN_WORLD_Z
+      );
     } else if (focusTarget === 'partition') {
       targetPos.set(swayX * 0.25, 1.66 + swayY * 0.2, 0.55);
       desiredLookAt.set(swayX * 0.2, 1.64 + swayY * 0.15, -0.82);
@@ -60,6 +115,90 @@ const CameraController: React.FC<{ focusTarget: FocusTarget }> = ({ focusTarget 
     state.camera.position.lerp(targetPos, speed);
     currentLookAt.lerp(desiredLookAt, speed);
     state.camera.lookAt(currentLookAt);
+
+    // Project all 4 world corners of the 3D CRT plane -> exact CSS matrix3d homography
+    const overlayEl = screenOverlayRef.current;
+    if (overlayEl) {
+      const isHoldingProp =
+        focusTarget === 'prop_lunchbox' ||
+        focusTarget === 'prop_mug' ||
+        focusTarget === 'polaroid';
+
+      state.camera.updateMatrixWorld();
+      tlVec
+        .set(-SCREEN_W / 2, SCREEN_WORLD_Y + SCREEN_H / 2, SCREEN_WORLD_Z)
+        .project(state.camera);
+      trVec
+        .set(SCREEN_W / 2, SCREEN_WORLD_Y + SCREEN_H / 2, SCREEN_WORLD_Z)
+        .project(state.camera);
+      blVec
+        .set(-SCREEN_W / 2, SCREEN_WORLD_Y - SCREEN_H / 2, SCREEN_WORLD_Z)
+        .project(state.camera);
+      brVec
+        .set(SCREEN_W / 2, SCREEN_WORLD_Y - SCREEN_H / 2, SCREEN_WORLD_Z)
+        .project(state.camera);
+
+      const inFront =
+        tlVec.z < 1 && trVec.z < 1 && blVec.z < 1 && brVec.z < 1;
+      const rect = state.gl.domElement.getBoundingClientRect();
+
+      const x0 = rect.left + (tlVec.x * 0.5 + 0.5) * rect.width;
+      const y0 = rect.top + (-tlVec.y * 0.5 + 0.5) * rect.height;
+      const x1 = rect.left + (trVec.x * 0.5 + 0.5) * rect.width;
+      const y1 = rect.top + (-trVec.y * 0.5 + 0.5) * rect.height;
+      const x2 = rect.left + (blVec.x * 0.5 + 0.5) * rect.width;
+      const y2 = rect.top + (-blVec.y * 0.5 + 0.5) * rect.height;
+      const x3 = rect.left + (brVec.x * 0.5 + 0.5) * rect.width;
+      const y3 = rect.top + (-brVec.y * 0.5 + 0.5) * rect.height;
+
+      const dx1 = x1 - x3;
+      const dy1 = y1 - y3;
+      const dx2 = x2 - x3;
+      const dy2 = y2 - y3;
+      const sx = x0 - x1 - x2 + x3;
+      const sy = y0 - y1 - y2 + y3;
+      const det = dx1 * dy2 - dx2 * dy1;
+
+      const quadW = Math.hypot(x1 - x0, y1 - y0);
+      const quadH = Math.hypot(x2 - x0, y2 - y0);
+
+      if (
+        inFront &&
+        Math.abs(det) > 1e-3 &&
+        quadW > 8 &&
+        quadH > 8 &&
+        !isHoldingProp
+      ) {
+        const g = (sx * dy2 - sy * dx2) / det;
+        const h = (dx1 * sy - dy1 * sx) / det;
+
+        const a = x1 - x0 + g * x1;
+        const d = y1 - y0 + g * y1;
+        const b = x2 - x0 + h * x2;
+        const e = y2 - y0 + h * y2;
+        const c = x0;
+        const f = y0;
+
+        const m11 = a / CRT_VIRTUAL_W;
+        const m12 = d / CRT_VIRTUAL_W;
+        const m14 = g / CRT_VIRTUAL_W;
+        const m21 = b / CRT_VIRTUAL_H;
+        const m22 = e / CRT_VIRTUAL_H;
+        const m24 = h / CRT_VIRTUAL_H;
+
+        overlayEl.style.transform = `matrix3d(${m11.toFixed(7)}, ${m12.toFixed(7)}, 0, ${m14.toFixed(9)}, ${m21.toFixed(7)}, ${m22.toFixed(7)}, 0, ${m24.toFixed(9)}, 0, 0, 1, 0, ${c.toFixed(3)}, ${f.toFixed(3)}, 0, 1)`;
+        overlayEl.style.visibility = 'visible';
+        overlayEl.style.opacity = '1';
+
+        const distToGoal = state.camera.position.distanceTo(targetPos);
+        const interactive = focusTarget === 'monitor' && distToGoal < 0.28;
+        overlayEl.style.pointerEvents = interactive ? 'auto' : 'none';
+      } else {
+        overlayEl.style.opacity = '0';
+        overlayEl.style.pointerEvents = 'none';
+        overlayEl.style.visibility = 'hidden';
+      }
+    }
   });
 
   return null;
@@ -79,7 +218,9 @@ const ExposureController: React.FC<{ brightness: number }> = ({ brightness }) =>
 };
 
 /* ============================================================================
-   LIGHTING RIG: NORMAL PENDANT LAMP vs. EERIE HYPNOTIC DISCO LIGHTS
+   LIGHTING RIG:
+   - ACT 1–2: Grounded 1980s–90s Municipal Basement Fluorescent Realism (Exit 8)
+   - ACT 3: Unnaturally Warm "Cozy Home / Birthday Party" Pastel Inversion
    ============================================================================ */
 const OfficeAndDiscoLighting: React.FC<{
   lensBroken: boolean;
@@ -87,8 +228,8 @@ const OfficeAndDiscoLighting: React.FC<{
   endingARedactedCount: number;
   brightness: number;
 }> = ({ lensBroken, endingChoice, endingARedactedCount, brightness }) => {
-  const discoGroupRef = useRef<THREE.Group>(null);
-  const pendantSpotRef = useRef<THREE.SpotLight>(null);
+  const partyGroupRef = useRef<THREE.Group>(null);
+  const overheadSpotRef = useRef<THREE.SpotLight>(null);
   const brokenTimestampRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -99,48 +240,48 @@ const OfficeAndDiscoLighting: React.FC<{
     }
   }, [lensBroken]);
 
-  // Individual beam controls:
-  // Branch A redactions extinguish Magenta (1st) -> Cold Cyan (2nd) -> Amber (3rd)
-  // Branch B freezes Magenta & Cyan across the desk
-  const magentaOn =
+  // Branch A redactions progressively extinguish Party Beams (Rose -> Cyan -> Gold)
+  // Branch B freezes beams across the office
+  const roseOn =
     lensBroken && (endingChoice !== 'A' || endingARedactedCount < 1);
   const cyanOn =
     lensBroken && (endingChoice !== 'A' || endingARedactedCount < 2);
-  const amberOn =
+  const peachGoldOn =
     lensBroken &&
     endingChoice !== 'B' &&
     (endingChoice !== 'A' || endingARedactedCount < 3);
 
   const activeBeams =
-    (magentaOn ? 1 : 0) + (cyanOn ? 1 : 0) + (amberOn ? 1 : 0);
-  const discoFactor = lensBroken ? activeBeams / 3 : 0;
-  const normalLampFactor =
+    (roseOn ? 1 : 0) + (cyanOn ? 1 : 0) + (peachGoldOn ? 1 : 0);
+  const cozyFactor = lensBroken ? activeBeams / 3 : 0;
+  const restoredFluorescent =
     endingChoice === 'A' && endingARedactedCount === 3
       ? 1
-      : 1 - discoFactor * 0.85;
+      : 1 - cozyFactor * 0.25;
 
   useFrame((_, delta) => {
-    // Slow, silent, hypnotic rotation (freezes in Branch B)
-    if (discoGroupRef.current && discoFactor > 0 && endingChoice !== 'B') {
-      const rotSpeed = 0.56 * discoFactor;
-      discoGroupRef.current.rotation.y += delta * rotSpeed;
+    if (partyGroupRef.current && cozyFactor > 0 && endingChoice !== 'B') {
+      const rotSpeed = 0.62 * cozyFactor;
+      partyGroupRef.current.rotation.y += delta * rotSpeed;
     }
 
-    // Two-beat overhead lamp glitch flicker right when lensBroken triggers
-    if (pendantSpotRef.current) {
+    if (overheadSpotRef.current) {
       if (lensBroken && brokenTimestampRef.current !== null) {
         const elapsedMs = performance.now() - brokenTimestampRef.current;
         if (elapsedMs < 650) {
           const glitch =
             (elapsedMs > 80 && elapsedMs < 180) ||
             (elapsedMs > 320 && elapsedMs < 440);
-          pendantSpotRef.current.intensity = (glitch ? 0.16 : 3.8) * brightness;
+          overheadSpotRef.current.intensity = (glitch ? 0.35 : 4.2) * brightness;
           return;
         }
       }
-      pendantSpotRef.current.intensity = THREE.MathUtils.lerp(
-        pendantSpotRef.current.intensity,
-        3.6 * normalLampFactor * brightness,
+      const targetIntensity = lensBroken
+        ? 4.1 * brightness
+        : 3.2 * restoredFluorescent * brightness;
+      overheadSpotRef.current.intensity = THREE.MathUtils.lerp(
+        overheadSpotRef.current.intensity,
+        targetIntensity,
         delta * 4
       );
     }
@@ -149,19 +290,19 @@ const OfficeAndDiscoLighting: React.FC<{
   return (
     <>
       <ambientLight
-        intensity={(discoFactor > 0 ? 0.42 : 0.62) * brightness}
-        color={discoFactor > 0 ? '#cbb8d4' : '#e8dfd1'}
+        intensity={(cozyFactor > 0 ? 0.82 : 0.48) * brightness}
+        color={cozyFactor > 0 ? '#ffd699' : '#d8dfd5'}
       />
 
-      {/* Overhead Office Pendant Lamp */}
+      {/* Overhead Office Fluorescent (Act 1–2) vs Warm Golden-Amber Cozy Glow (Act 3) */}
       <spotLight
-        ref={pendantSpotRef}
-        position={[0, 2.65, 0.35]}
-        angle={0.78}
-        penumbra={0.65}
-        intensity={3.6 * brightness}
-        distance={6.5}
-        color="#fff0d4"
+        ref={overheadSpotRef}
+        position={[0.05, 2.68, 0.32]}
+        angle={0.88}
+        penumbra={0.55}
+        intensity={3.2 * brightness}
+        distance={7.5}
+        color={cozyFactor > 0 ? '#ffc266' : '#eef2e6'}
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -171,53 +312,53 @@ const OfficeAndDiscoLighting: React.FC<{
       {!lensBroken && (
         <pointLight
           position={[-0.25, 1.65, -1.15]}
-          intensity={1.45 * brightness}
+          intensity={1.35 * brightness}
           distance={3.0}
           color="#f5d18c"
         />
       )}
 
-      {/* Eerie Slow-Rotating Disco Lights when Lens is Broken
-          Colors: Magenta (#ff007f), Cold Cyan (#00e5ff), Sickly Amber (#ffaa00) */}
+      {/* Act 3 "Cozy Home / Birthday Party" Pastel Rotating Beams */}
       {activeBeams > 0 && (
-        <group ref={discoGroupRef} position={[0, 2.25, 0.1]}>
-          {/* Beam 1: Magenta (#ff007f) */}
-          {magentaOn && (
+        <group ref={partyGroupRef} position={[0, 2.15, 0.25]}>
+          {/* Beam 1: Warm Rose-Pink (#ff7eb6) */}
+          {roseOn && (
             <pointLight
-              position={[1.15, -0.35, 0.55]}
-              color="#ff007f"
+              position={[1.15, -0.4, 0.65]}
+              color="#ff7eb6"
               intensity={3.4 * brightness}
-              distance={4.8}
+              distance={5.6}
             />
           )}
-          {/* Beam 2: Cold Cyan (#00e5ff) */}
+          {/* Beam 2: Soft Baby-Cyan (#72e8ff) */}
           {cyanOn && (
             <pointLight
-              position={[-1.05, -0.25, 0.45]}
-              color="#00e5ff"
-              intensity={3.2 * brightness}
-              distance={4.8}
+              position={[-1.1, -0.35, 0.62]}
+              color="#72e8ff"
+              intensity={3.1 * brightness}
+              distance={5.6}
             />
           )}
-          {/* Beam 3: Sickly Amber (#ffaa00) */}
-          {amberOn && (
+          {/* Beam 3: Sunny Peach-Gold (#ffbe55) */}
+          {peachGoldOn && (
             <pointLight
-              position={[0.1, -0.3, -0.95]}
-              color="#ffaa00"
-              intensity={3.0 * brightness}
-              distance={4.8}
+              position={[0.1, -0.4, -0.75]}
+              color="#ffbe55"
+              intensity={3.5 * brightness}
+              distance={5.6}
             />
           )}
 
-          {/* Overhead Rotating Disco Fixture Sphere */}
-          <mesh position={[0, 0.25, 0]}>
-            <octahedronGeometry args={[0.11, 1]} />
+          {/* Overhead Rotating Party Bulb */}
+          <mesh position={[0, 0.36, -0.15]}>
+            <octahedronGeometry args={[0.1, 1]} />
             <meshStandardMaterial
-              color="#2b262d"
-              emissive={magentaOn ? '#ff007f' : cyanOn ? '#00e5ff' : '#ffaa00'}
-              emissiveIntensity={0.45 * discoFactor}
-              metalness={0.85}
-              roughness={0.2}
+              color="#fff4e0"
+              emissive={roseOn ? '#ff7eb6' : cyanOn ? '#72e8ff' : '#ffbe55'}
+              emissiveIntensity={0.7 * cozyFactor}
+              metalness={0.35}
+              roughness={0.25}
+              flatShading
             />
           </mesh>
         </group>
@@ -227,115 +368,173 @@ const OfficeAndDiscoLighting: React.FC<{
 };
 
 /* ============================================================================
-   IMMOVABLE OBJECTS: CRT MONITOR (#302) & FROSTED GLASS PARTITION
+   VINTAGE CRT MONITOR (#302) — SLIM SCULPTED BEZEL, LED & SINGLE-CLICK ZOOM
    ============================================================================ */
 const VintageCRTMonitorMesh: React.FC<{
-  quotaCount: number;
-  file03Decrypted: boolean;
+  actStage: ActStage;
   lensBroken: boolean;
+  endingChoice: 'A' | 'B' | null;
   endingARedactedCount: number;
   lang: Language;
   isFocused: boolean;
-  onSelect: () => void;
+  onFocusMonitor: () => void;
+  onExitFocus: () => void;
+  onHoverLabel?: (label: string | null) => void;
 }> = ({
-  quotaCount,
-  file03Decrypted,
+  actStage,
   lensBroken,
+  endingChoice,
   endingARedactedCount,
   lang,
   isFocused,
-  onSelect,
+  onFocusMonitor,
+  onExitFocus,
+  onHoverLabel,
 }) => {
   const [hovered, setHovered] = useState(false);
 
   const screenTex = useMemo(
     () =>
       createMonitorScreenCanvasTexture(
-        quotaCount,
-        file03Decrypted,
+        actStage,
         lensBroken,
         lang,
+        endingChoice,
         endingARedactedCount
       ),
-    [quotaCount, file03Decrypted, lensBroken, lang, endingARedactedCount]
+    [actStage, lensBroken, lang, endingChoice, endingARedactedCount]
   );
 
   const nameplateTex = useMemo(() => createNameplateTexture(), []);
 
   return (
     <group
-      position={[0, 0.76, -0.18]}
+      position={MONITOR_GROUP_POS}
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
         setHovered(true);
+        if (!isFocused) {
+          onHoverLabel?.(
+            lang === 'zh'
+              ? '[ 显示器 TCD-302 / CRT MONITOR ]'
+              : '[ CRT MONITOR TCD-302 ]'
+          );
+        }
         document.body.style.cursor = 'pointer';
       }}
       onPointerOut={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
         setHovered(false);
+        onHoverLabel?.(null);
         document.body.style.cursor = 'default';
       }}
       onClick={(e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation();
-        onSelect();
+        if (isFocused) {
+          onExitFocus();
+        } else {
+          onFocusMonitor();
+        }
       }}
     >
-      {/* Monitor Pedestal Base */}
+      {/* Monitor Pedestal Base & Neck */}
       <mesh position={[0, 0.03, 0]} castShadow receiveShadow>
-        <boxGeometry args={[0.46, 0.06, 0.36]} />
-        <meshStandardMaterial color="#2b2723" roughness={0.7} />
+        <boxGeometry args={[0.48, 0.06, 0.36]} />
+        <meshStandardMaterial color="#2b2723" roughness={0.62} flatShading />
       </mesh>
       <mesh position={[0, 0.09, -0.02]} castShadow>
-        <cylinderGeometry args={[0.11, 0.14, 0.08, 16]} />
-        <meshStandardMaterial color="#24201c" roughness={0.75} />
+        <cylinderGeometry args={[0.11, 0.14, 0.09, 12]} />
+        <meshStandardMaterial color="#24201c" roughness={0.68} flatShading />
       </mesh>
 
       {/* Rear CRT Cathode Tube Housing */}
-      <mesh position={[0, 0.42, -0.16]} castShadow receiveShadow>
-        <boxGeometry args={[0.62, 0.48, 0.28]} />
-        <meshStandardMaterial color="#292521" roughness={0.72} />
+      <mesh position={[0, 0.42, -0.17]} castShadow receiveShadow>
+        <boxGeometry args={[0.68, 0.48, 0.28]} />
+        <meshStandardMaterial color="#292521" roughness={0.66} flatShading />
       </mesh>
 
-      {/* Main Sculpted Monitor Casing */}
-      <mesh position={[0, 0.43, 0.02]} castShadow receiveShadow>
-        <boxGeometry args={[0.78, 0.62, 0.24]} />
+      {/* Main Sculpted Plastic Bezel Casing */}
+      <mesh position={[0, 0.415, 0.02]} castShadow receiveShadow>
+        <boxGeometry args={[0.88, 0.59, 0.26]} />
         <meshStandardMaterial
-          color={hovered && !isFocused ? '#3d3731' : '#332e29'}
-          roughness={0.65}
+          color={hovered && !isFocused ? '#4a433c' : '#36312b'}
+          roughness={0.36}
+          metalness={0.18}
+          flatShading
         />
       </mesh>
 
-      {/* Dark Recessed Inner Screen Frame */}
-      <mesh position={[0, 0.44, 0.135]}>
-        <boxGeometry args={[0.66, 0.48, 0.02]} />
-        <meshStandardMaterial color="#141210" roughness={0.8} />
+      {/* Slim Raised Bezel Lip Framing the CRT Glass */}
+      <mesh position={[0, 0.435, 0.146]}>
+        <boxGeometry args={[0.825, 0.5, 0.018]} />
+        <meshStandardMaterial
+          color="#181512"
+          roughness={0.3}
+          metalness={0.22}
+          flatShading
+        />
       </mesh>
 
       {/* Glowing Live Monitor Screen Plane */}
-      <mesh position={[0, 0.44, 0.148]}>
-        <planeGeometry args={[0.62, 0.44]} />
+      <mesh position={[0, SCREEN_LOCAL_Y, SCREEN_LOCAL_Z]}>
+        <planeGeometry args={[SCREEN_W, SCREEN_H]} />
         <meshBasicMaterial map={screenTex} />
       </mesh>
 
-      {/* Physical Metallic Nameplate: TCD-302 (Top Left of Bezel) */}
-      <mesh position={[-0.24, 0.7, 0.142]}>
-        <planeGeometry args={[0.16, 0.04]} />
-        <meshStandardMaterial map={nameplateTex} metalness={0.6} roughness={0.35} />
+      {/* Physical Metallic Nameplate: TCD-302 */}
+      <mesh position={[-0.31, 0.155, 0.152]}>
+        <planeGeometry args={[0.14, 0.032]} />
+        <meshStandardMaterial
+          map={nameplateTex}
+          metalness={0.65}
+          roughness={0.28}
+        />
       </mesh>
 
-      {/* Power Indicator LED (Bottom Right of Bezel) */}
-      <mesh position={[0.28, 0.16, 0.143]}>
-        <boxGeometry args={[0.022, 0.014, 0.008]} />
-        <meshBasicMaterial color={lensBroken ? '#ff2a3c' : '#e0c37b'} />
+      {/* Power Indicator LED */}
+      <mesh position={[0.35, 0.155, 0.154]}>
+        <boxGeometry args={[0.024, 0.014, 0.008]} />
+        <meshBasicMaterial color={lensBroken ? '#ff66a8' : '#8fd68a'} />
+      </mesh>
+      <pointLight
+        position={[0.35, 0.155, 0.18]}
+        intensity={lensBroken ? 0.32 : 0.16}
+        distance={0.28}
+        color={lensBroken ? '#ff66a8' : '#8fd68a'}
+      />
+
+      {/* Contrast / Brightness Knobs beside LED */}
+      <mesh position={[0.27, 0.155, 0.153]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.011, 0.011, 0.012, 8]} />
+        <meshStandardMaterial
+          color="#1f1c19"
+          roughness={0.4}
+          metalness={0.3}
+          flatShading
+        />
+      </mesh>
+      <mesh position={[0.23, 0.155, 0.153]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.011, 0.011, 0.012, 8]} />
+        <meshStandardMaterial
+          color="#1f1c19"
+          roughness={0.4}
+          metalness={0.3}
+          flatShading
+        />
       </mesh>
     </group>
   );
 };
 
+/* ============================================================================
+   FROSTED GLASS PARTITION (ADJACENT DESK #209)
+   ============================================================================ */
 const FrostedPartitionMesh: React.FC<{
   lensBroken: boolean;
+  lang: Language;
   onSelect: () => void;
-}> = ({ lensBroken, onSelect }) => {
+  onHoverLabel?: (label: string | null) => void;
+}> = ({ lensBroken, lang, onSelect, onHoverLabel }) => {
   const [hovered, setHovered] = useState(false);
   const glassTex = useMemo(
     () => createPartitionGlassTexture(lensBroken),
@@ -344,15 +543,21 @@ const FrostedPartitionMesh: React.FC<{
 
   return (
     <group
-      position={[0, 1.56, -0.78]}
+      position={[0.08, 1.56, -0.82]}
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
         setHovered(true);
+        onHoverLabel?.(
+          lang === 'zh'
+            ? '[ 磨砂玻璃隔断 / FROSTED PARTITION ]'
+            : '[ FROSTED PARTITION ]'
+        );
         document.body.style.cursor = 'pointer';
       }}
       onPointerOut={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
         setHovered(false);
+        onHoverLabel?.(null);
         document.body.style.cursor = 'default';
       }}
       onClick={(e: ThreeEvent<MouseEvent>) => {
@@ -360,40 +565,35 @@ const FrostedPartitionMesh: React.FC<{
         onSelect();
       }}
     >
-      {/* Outer Wooden/Steel Partition Frame */}
       <mesh position={[0, 0.34, 0]} castShadow>
-        <boxGeometry args={[2.3, 0.05, 0.06]} />
+        <boxGeometry args={[2.2, 0.05, 0.06]} />
         <meshStandardMaterial
           color={hovered ? '#473e35' : '#2e2822'}
           roughness={0.7}
+          flatShading
         />
       </mesh>
       <mesh position={[0, -0.34, 0]} castShadow>
-        <boxGeometry args={[2.3, 0.05, 0.06]} />
+        <boxGeometry args={[2.2, 0.05, 0.06]} />
         <meshStandardMaterial
           color={hovered ? '#473e35' : '#2e2822'}
           roughness={0.7}
+          flatShading
         />
       </mesh>
-      {/* Vertical Mullion Bars */}
-      {[-1.12, -0.38, 0.38, 1.12].map((xPos, idx) => (
+      {[-1.07, -0.36, 0.36, 1.07].map((xPos, idx) => (
         <mesh key={idx} position={[xPos, 0, 0]} castShadow>
           <boxGeometry args={[0.05, 0.72, 0.06]} />
           <meshStandardMaterial
             color={hovered ? '#473e35' : '#2e2822'}
             roughness={0.7}
+            flatShading
           />
         </mesh>
       ))}
-
-      {/* Ribbed Frosted Glass Plane */}
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[2.22, 0.64]} />
-        <meshStandardMaterial
-          map={glassTex}
-          roughness={0.35}
-          metalness={0.1}
-        />
+        <planeGeometry args={[2.12, 0.64]} />
+        <meshStandardMaterial map={glassTex} roughness={0.35} metalness={0.1} />
       </mesh>
     </group>
   );
@@ -404,32 +604,34 @@ const FrostedPartitionMesh: React.FC<{
    ============================================================================ */
 export const DeskScene: React.FC<DeskSceneProps> = ({
   lang,
+  actStage,
   focusTarget,
-  quotaCount,
-  redactedTargets,
-  file03Decrypted,
-  file04Delivered,
-  file05Delivered,
   lensBroken,
   endingChoice,
   endingARedactedCount,
   brightness,
+  drawerLocks,
+  openDrawers,
+  isTapePlaying,
+  isDeskLampOn,
+  activeDeskFiles,
+  screenOverlayRef,
   onSelectFocus,
+  onDeskFileClick,
+  onToggleDrawer,
+  onLockedDrawerRattle,
+  onInspectDrawerFolder,
+  onToggleTape,
+  onInspectPlant,
+  onToggleDeskLamp,
+  onInspectCalendar,
+  onHoverPropChange,
 }) => {
   const walnutTex = useMemo(() => createWalnutDeskTexture(), []);
+  const concreteTex = useMemo(() => createConcreteWallTexture(), []);
+  const tileTex = useMemo(() => createBasementTileTexture(), []);
 
-  const file01Done =
-    redactedTargets.includes('f1_target1') &&
-    redactedTargets.includes('f1_target2');
-  const file03Done = redactedTargets.includes('f3_target1');
-  const file04Done = redactedTargets.includes('f4_target1');
-  const file05Done = redactedTargets.includes('f5_target1');
-
-  const file03Status: 'locked' | 'decrypted' | 'complete' = !file03Decrypted
-    ? 'locked'
-    : file03Done
-    ? 'complete'
-    : 'decrypted';
+  const showWorldPrompts = focusTarget === 'none';
 
   return (
     <div
@@ -450,11 +652,20 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           }
         }}
       >
-        <color attach="background" args={['#080706']} />
-        <fogExp2 attach="fog" args={['#080706', 0.15]} />
+        <color
+          attach="background"
+          args={[lensBroken ? '#241619' : '#151816']}
+        />
+        <fogExp2
+          attach="fog"
+          args={[lensBroken ? '#241619' : '#151816', lensBroken ? 0.095 : 0.085]}
+        />
 
         <ExposureController brightness={brightness} />
-        <CameraController focusTarget={focusTarget} />
+        <CameraController
+          focusTarget={focusTarget}
+          screenOverlayRef={screenOverlayRef}
+        />
         <OfficeAndDiscoLighting
           lensBroken={lensBroken}
           endingChoice={endingChoice}
@@ -462,80 +673,198 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           brightness={brightness}
         />
 
-        {/* ====================================================================
-            STATIC 3D OFFICE DESK & CABINET #3 ARCHITECTURE
-            ==================================================================== */}
+        {/* GROUNDED BASEMENT ROOM ENCLOSURE (Exit 8 Institutional Realism) */}
         <group>
-          {/* Main Walnut Desk Tabletop */}
-          <mesh position={[0, 0.72, 0.05]} receiveShadow castShadow>
-            <boxGeometry args={[2.28, 0.08, 1.24]} />
-            <meshStandardMaterial map={walnutTex} roughness={0.78} />
+          {/* Tiled Concrete Basement Floor */}
+          <mesh
+            position={[0, 0, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            receiveShadow
+          >
+            <planeGeometry args={[8, 7]} />
+            <meshStandardMaterial
+              map={tileTex}
+              color={lensBroken ? '#423034' : '#ffffff'}
+              roughness={0.88}
+            />
           </mesh>
 
-          {/* Dark Matte Desk Pad */}
-          <mesh position={[0, 0.763, 0.14]} receiveShadow>
-            <boxGeometry args={[1.56, 0.006, 0.86]} />
-            <meshStandardMaterial color="#161412" roughness={0.9} />
+          {/* Back Institutional Plaster/Cinderblock Wall */}
+          <mesh position={[0, 1.65, -1.78]} receiveShadow>
+            <planeGeometry args={[8, 3.6]} />
+            <meshStandardMaterial
+              map={concreteTex}
+              color={lensBroken ? '#523438' : '#b8bfb4'}
+              roughness={0.92}
+            />
           </mesh>
 
-          {/* Left & Right Desk Drawer Pedestals */}
-          <mesh position={[-0.82, 0.34, 0.05]} receiveShadow castShadow>
-            <boxGeometry args={[0.52, 0.68, 1.12]} />
-            <meshStandardMaterial map={walnutTex} roughness={0.82} />
-          </mesh>
-          <mesh position={[0.82, 0.34, 0.05]} receiveShadow castShadow>
-            <boxGeometry args={[0.52, 0.68, 1.12]} />
-            <meshStandardMaterial map={walnutTex} roughness={0.82} />
+          {/* Left Basement Side Wall */}
+          <mesh
+            position={[-2.25, 1.65, 0.2]}
+            rotation={[0, Math.PI / 2, 0]}
+            receiveShadow
+          >
+            <planeGeometry args={[6, 3.6]} />
+            <meshStandardMaterial
+              map={concreteTex}
+              color={lensBroken ? '#4d3034' : '#aeb5aa'}
+              roughness={0.92}
+            />
           </mesh>
 
-          {/* Looming Archive Cabinet #3 in the Back-Left Shadow */}
-          <group position={[-1.42, 0.88, -0.85]} rotation={[0, 0.22, 0]}>
-            <mesh castShadow receiveShadow>
-              <boxGeometry args={[0.68, 1.76, 0.62]} />
-              <meshStandardMaterial color="#1d1b18" roughness={0.72} metalness={0.35} />
+          {/* Overhead Fluorescent Fixture Housing */}
+          <group position={[0.05, 2.75, 0.2]}>
+            <mesh>
+              <boxGeometry args={[1.15, 0.05, 0.22]} />
+              <meshStandardMaterial color="#3a3f3a" roughness={0.6} flatShading />
             </mesh>
-            {/* Slightly Ajar Drawer #3 */}
-            <mesh position={[0, 0.05, 0.34]} castShadow>
-              <boxGeometry args={[0.6, 0.34, 0.12]} />
-              <meshStandardMaterial color="#26231f" roughness={0.68} metalness={0.4} />
+            <mesh position={[0, -0.028, 0]}>
+              <boxGeometry args={[1.05, 0.012, 0.14]} />
+              <meshBasicMaterial
+                color={lensBroken ? '#ffd48a' : '#eef5e8'}
+              />
             </mesh>
           </group>
         </group>
 
-        {/* ====================================================================
-            IMMOVABLE INTERACTABLES (CAMERA DOLLY)
-            ==================================================================== */}
+        {/* STATIC 3D WALNUT DESK (Shifted slightly right to give Cabinet clear space) */}
+        <group
+          onClick={(e: ThreeEvent<MouseEvent>) => {
+            if (focusTarget === 'monitor') {
+              e.stopPropagation();
+              onSelectFocus('none');
+            }
+          }}
+        >
+          {/* Main Walnut Desk Tabletop: x in [-0.84, +1.12] */}
+          <mesh position={[0.14, 0.725, 0.05]} receiveShadow castShadow>
+            <boxGeometry args={[1.96, 0.07, 1.2]} />
+            <meshStandardMaterial
+              map={walnutTex}
+              roughness={0.62}
+              metalness={0.08}
+              flatShading
+            />
+          </mesh>
+
+          {/* Dark Matte Desk Pad */}
+          <mesh position={[0.06, 0.763, 0.14]} receiveShadow>
+            <boxGeometry args={[1.42, 0.006, 0.82]} />
+            <meshStandardMaterial color="#161412" roughness={0.85} flatShading />
+          </mesh>
+
+          {/* Left & Right Desk Drawer Pedestals */}
+          <mesh position={[-0.64, 0.345, 0.05]} receiveShadow castShadow>
+            <boxGeometry args={[0.42, 0.69, 1.08]} />
+            <meshStandardMaterial map={walnutTex} roughness={0.82} flatShading />
+          </mesh>
+          <mesh position={[0.86, 0.345, 0.05]} receiveShadow castShadow>
+            <boxGeometry args={[0.46, 0.69, 1.08]} />
+            <meshStandardMaterial map={walnutTex} roughness={0.82} flatShading />
+          </mesh>
+        </group>
+
+        {/* INSTITUTIONAL GREEN 3-TIER METAL FILING CABINET + CABINET-TOP CLUTTER & PLANT */}
+        <FilingCabinetMesh
+          position={[-1.15, 0, -0.06]}
+          rotation={[0, 0.08, 0]}
+          lang={lang}
+          lensBroken={lensBroken}
+          drawerLocks={drawerLocks}
+          openDrawers={openDrawers}
+          showWorldPrompt={showWorldPrompts}
+          onToggleDrawer={onToggleDrawer}
+          onLockedDrawerRattle={onLockedDrawerRattle}
+          onInspectDrawerFolder={onInspectDrawerFolder}
+          onInspectPlant={onInspectPlant}
+          onHoverLabel={onHoverPropChange}
+        />
+
+        {/* IMMOVABLE INTERACTABLES: FROSTED PARTITION & CRT MONITOR */}
         <FrostedPartitionMesh
           lensBroken={lensBroken}
+          lang={lang}
           onSelect={() =>
             onSelectFocus(focusTarget === 'partition' ? 'none' : 'partition')
           }
+          onHoverLabel={onHoverPropChange}
         />
 
         <VintageCRTMonitorMesh
-          quotaCount={quotaCount}
-          file03Decrypted={file03Decrypted}
+          actStage={actStage}
           lensBroken={lensBroken}
+          endingChoice={endingChoice}
           endingARedactedCount={endingARedactedCount}
           lang={lang}
           isFocused={focusTarget === 'monitor'}
-          onSelect={() =>
-            onSelectFocus(focusTarget === 'monitor' ? 'none' : 'monitor')
-          }
+          onFocusMonitor={() => onSelectFocus('monitor')}
+          onExitFocus={() => onSelectFocus('none')}
+          onHoverLabel={onHoverPropChange}
         />
 
-        {/* ====================================================================
-            MOVABLE INTERACTABLES (PICK UP TO CAMERA FRONT + ±15° PARALLAX)
-            ==================================================================== */}
+        {/* FOCUSED VINTAGE DESK LAMP (Back-Left Desk Corner) */}
+        <VintageDeskLampMesh
+          position={[-0.7, 0.76, -0.34]}
+          rotation={[0, 0.45, 0]}
+          isOn={isDeskLampOn}
+          lensBroken={lensBroken}
+          brightness={brightness}
+          lang={lang}
+          showWorldPrompt={showWorldPrompts}
+          onToggle={onToggleDeskLamp}
+          onHoverLabel={onHoverPropChange}
+        />
 
-        {/* 1. Taped Polaroid Family_Photo.jpg on Monitor Lower-Left Bezel */}
+        {/* LOOPING-TIME DESK CALENDAR (11/13) */}
+        <DeskCalendarMesh
+          position={[0.56, 0.76, -0.26]}
+          rotation={[0, -0.24, 0]}
+          lang={lang}
+          showWorldPrompt={showWorldPrompts}
+          onInspect={onInspectCalendar}
+          onHoverLabel={onHoverPropChange}
+        />
+
+        {/* LIVED-IN DESK CLUTTER: METALLIC PAPERCLIPS & YELLOWING STICKY NOTES */}
+        <DeskClutterGroup />
+
+        {/* DESKTOP LOW-POLY CASSETTE TAPE RECORDER (Back-Right Desk Corner) */}
+        <TapeRecorderMesh
+          position={[0.82, 0.76, -0.32]}
+          rotation={[0, -0.28, 0]}
+          isTapePlaying={isTapePlaying}
+          lensBroken={lensBroken}
+          lang={lang}
+          showWorldPrompt={showWorldPrompts}
+          onToggleTape={onToggleTape}
+          onHoverLabel={onHoverPropChange}
+        />
+
+        {/* REPOSITIONED FAMILY_PHOTO ON CABINET SIDE WALL (Clear of Monitor & Desk) */}
         <InteractableProp
-          restPosition={[-0.36, 1.02, -0.02]}
-          restRotation={[0, 0.08, 0.06]}
+          restPosition={[-0.892, 1.04, -0.02]}
+          restRotation={[0, Math.PI / 2 + 0.08, 0.02]}
+          hoverOffset={[0.015, 0.01, 0]}
+          hoverLabel={
+            lang === 'zh'
+              ? '[家庭照片 — 端详]'
+              : '[FAMILY PHOTO — INSPECT]'
+          }
+          showWorldPrompt={showWorldPrompts}
           inspectPosition={[0, 1.37, 1.48]}
           inspectRotation={[0.04, 0, 0]}
           inspectScale={1.55}
           isFocused={focusTarget === 'polaroid'}
+          onHoverChange={(h) =>
+            onHoverPropChange(
+              h
+                ? lang === 'zh'
+                  ? '[ 拍立得家庭照片 / FAMILY PHOTO ]'
+                  : '[ FAMILY PHOTO ]'
+                : null
+            )
+          }
           onSelect={() =>
             onSelectFocus(focusTarget === 'polaroid' ? 'none' : 'polaroid')
           }
@@ -543,14 +872,27 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           <PolaroidPhotoMesh lensBroken={lensBroken} />
         </InteractableProp>
 
-        {/* 2. Aluminum Lunchbox (Left Desk Surface) */}
+        {/* DESK PROPS (PICK UP TO CAMERA FRONT + ±15° PARALLAX) */}
         <InteractableProp
-          restPosition={[-0.68, 0.766, 0.02]}
+          restPosition={[-0.64, 0.766, 0.1]}
           restRotation={[0, 0.28, 0]}
+          hoverLabel={
+            lang === 'zh' ? '[铝制便当盒 — 查看]' : '[LUNCHBOX — INSPECT]'
+          }
+          showWorldPrompt={showWorldPrompts}
           inspectPosition={[0, 1.31, 1.42]}
           inspectRotation={[0.38, -0.15, 0]}
           inspectScale={1.45}
           isFocused={focusTarget === 'prop_lunchbox'}
+          onHoverChange={(h) =>
+            onHoverPropChange(
+              h
+                ? lang === 'zh'
+                  ? '[ 铝制便当盒 / TIN LUNCHBOX ]'
+                  : '[ TIN LUNCHBOX ]'
+                : null
+            )
+          }
           onSelect={() =>
             onSelectFocus(
               focusTarget === 'prop_lunchbox' ? 'none' : 'prop_lunchbox'
@@ -560,14 +902,26 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           <LunchboxMesh lensBroken={lensBroken} lang={lang} />
         </InteractableProp>
 
-        {/* 3. Stained Ceramic Coffee Mug (Front-Right Desk Surface) */}
         <InteractableProp
-          restPosition={[0.48, 0.766, 0.36]}
+          restPosition={[0.44, 0.766, 0.42]}
           restRotation={[0, -0.45, 0]}
+          hoverLabel={
+            lang === 'zh' ? '[陶瓷马克杯 — 查看]' : '[COFFEE MUG — INSPECT]'
+          }
+          showWorldPrompt={showWorldPrompts}
           inspectPosition={[0, 1.31, 1.46]}
           inspectRotation={[0.32, -0.35, 0]}
           inspectScale={1.65}
           isFocused={focusTarget === 'prop_mug'}
+          onHoverChange={(h) =>
+            onHoverPropChange(
+              h
+                ? lang === 'zh'
+                  ? '[ 陶瓷马克杯 / CERAMIC MUG ]'
+                  : '[ CERAMIC MUG ]'
+                : null
+            )
+          }
           onSelect={() =>
             onSelectFocus(focusTarget === 'prop_mug' ? 'none' : 'prop_mug')
           }
@@ -575,102 +929,107 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           <CoffeeMugMesh lensBroken={lensBroken} />
         </InteractableProp>
 
-        {/* 4. Department Standard Operating Manual Booklet (Front-Left Desk Corner) */}
-        <InteractableProp
-          restPosition={[-0.58, 0.766, 0.38]}
-          restRotation={[0, 0.18, 0]}
-          inspectPosition={[-0.38, 1.32, 1.25]}
-          inspectRotation={[0.65, 0.12, 0]}
-          inspectScale={1.2}
-          isFocused={focusTarget === 'manual'}
-          onSelect={() =>
-            onSelectFocus(focusTarget === 'manual' ? 'none' : 'manual')
-          }
-        >
-          <ManualBookletMesh />
-        </InteractableProp>
-
-        {/* 5. Three Fanned Kraft Archival Dossiers (#01, #02, #03 on Right Desk Corner) */}
-        <InteractableProp
-          restPosition={[0.56, 0.794, 0.06]}
-          restRotation={[0, -0.12, 0]}
-          inspectPosition={[0.38, 1.32, 1.22]}
-          inspectRotation={[0.65, -0.12, 0]}
-          inspectScale={1.2}
-          isFocused={focusTarget === 'file01'}
-          onSelect={() =>
-            onSelectFocus(focusTarget === 'file01' ? 'none' : 'file01')
-          }
-        >
-          <DossierFolderMesh
-            num="#01"
-            status={file01Done ? 'complete' : 'normal'}
-          />
-        </InteractableProp>
-
-        <InteractableProp
-          restPosition={[0.64, 0.78, -0.04]}
-          restRotation={[0, -0.22, 0]}
-          inspectPosition={[0.38, 1.32, 1.22]}
-          inspectRotation={[0.65, -0.12, 0]}
-          inspectScale={1.2}
-          isFocused={focusTarget === 'file02' || focusTarget === 'compare'}
-          onSelect={() =>
-            onSelectFocus(focusTarget === 'file02' ? 'none' : 'file02')
-          }
-        >
-          <DossierFolderMesh num="#02" status="normal" />
-        </InteractableProp>
-
-        <InteractableProp
-          restPosition={[0.72, 0.766, -0.14]}
-          restRotation={[0, -0.32, 0]}
-          inspectPosition={[0.38, 1.32, 1.22]}
-          inspectRotation={[0.65, -0.12, 0]}
-          inspectScale={1.2}
-          isFocused={focusTarget === 'file03' || focusTarget === 'compare'}
-          onSelect={() =>
-            onSelectFocus(focusTarget === 'file03' ? 'none' : 'file03')
-          }
-        >
-          <DossierFolderMesh num="#03" status={file03Status} />
-        </InteractableProp>
-
-        {file04Delivered && (
+        {/* PHASE 2 PHYSICAL DESK FILES PLACEHOLDERS (Wired to activeDeskFiles) */}
+        {activeDeskFiles.includes('manual') && (
           <InteractableProp
-            restPosition={[0.82, 0.78, 0.14]}
-            restRotation={[0, -0.06, 0]}
-            inspectPosition={[0.38, 1.32, 1.22]}
-            inspectRotation={[0.65, -0.12, 0]}
-            inspectScale={1.2}
-            isFocused={focusTarget === 'file04'}
-            onSelect={() =>
-              onSelectFocus(focusTarget === 'file04' ? 'none' : 'file04')
+            restPosition={[-0.56, 0.766, 0.4]}
+            restRotation={[0, 0.18, 0]}
+            isFocused={false}
+            onHoverChange={(h) =>
+              onHoverPropChange(
+                h
+                  ? lang === 'zh'
+                    ? '[ 部门操作手册与钢笔 / TCD MANUAL ]'
+                    : '[ TCD MANUAL & PEN ]'
+                  : null
+              )
             }
+            onSelect={() => onDeskFileClick('manual')}
+          >
+            <ManualBookletMesh />
+          </InteractableProp>
+        )}
+
+        {activeDeskFiles.includes('file01') && (
+          <InteractableProp
+            restPosition={[0.58, 0.794, 0.18]}
+            restRotation={[0, -0.12, 0]}
+            isFocused={false}
+            onHoverChange={(h) =>
+              onHoverPropChange(
+                h
+                  ? lang === 'zh'
+                    ? '[ 档案卷宗 #01 / DOSSIER #01 ]'
+                    : '[ DOSSIER #01 ]'
+                  : null
+              )
+            }
+            onSelect={() => onDeskFileClick('file01')}
+          >
+            <DossierFolderMesh num="#01" status="normal" />
+          </InteractableProp>
+        )}
+
+        {activeDeskFiles.includes('file02') && (
+          <InteractableProp
+            restPosition={[0.68, 0.78, 0.09]}
+            restRotation={[0, -0.22, 0]}
+            isFocused={false}
+            onHoverChange={(h) =>
+              onHoverPropChange(
+                h
+                  ? lang === 'zh'
+                    ? '[ 档案卷宗 #02 / DOSSIER #02 ]'
+                    : '[ DOSSIER #02 ]'
+                  : null
+              )
+            }
+            onSelect={() => onDeskFileClick('file02')}
+          >
+            <DossierFolderMesh num="#02" status="normal" />
+          </InteractableProp>
+        )}
+
+        {activeDeskFiles.includes('file03') && (
+          <InteractableProp
+            restPosition={[0.78, 0.766, 0.01]}
+            restRotation={[0, -0.32, 0]}
+            isFocused={false}
+            onHoverChange={(h) =>
+              onHoverPropChange(
+                h
+                  ? lang === 'zh'
+                    ? '[ 档案卷宗 #03 / DOSSIER #03 ]'
+                    : '[ DOSSIER #03 ]'
+                  : null
+              )
+            }
+            onSelect={() => onDeskFileClick('file03')}
           >
             <DossierFolderMesh
-              num="#04"
-              status={file04Done ? 'complete' : 'decrypted'}
+              num="#03"
+              status={actStage >= 2 ? 'decrypted' : 'locked'}
             />
           </InteractableProp>
         )}
 
-        {file05Delivered && (
+        {activeDeskFiles.includes('file04') && (
           <InteractableProp
-            restPosition={[0.86, 0.794, -0.02]}
-            restRotation={[0, -0.18, 0]}
-            inspectPosition={[0.38, 1.32, 1.22]}
-            inspectRotation={[0.65, -0.12, 0]}
-            inspectScale={1.2}
-            isFocused={focusTarget === 'file05'}
-            onSelect={() =>
-              onSelectFocus(focusTarget === 'file05' ? 'none' : 'file05')
+            restPosition={[0.42, 0.768, 0.18]}
+            restRotation={[0, -0.06, 0]}
+            isFocused={false}
+            onHoverChange={(h) =>
+              onHoverPropChange(
+                h
+                  ? lang === 'zh'
+                    ? '[ 档案卷宗 #04 / DOSSIER #04 ]'
+                    : '[ DOSSIER #04 ]'
+                  : null
+              )
             }
+            onSelect={() => onDeskFileClick('file04')}
           >
-            <DossierFolderMesh
-              num="#05"
-              status={file05Done ? 'complete' : 'decrypted'}
-            />
+            <DossierFolderMesh num="#04" status="decrypted" />
           </InteractableProp>
         )}
       </Canvas>

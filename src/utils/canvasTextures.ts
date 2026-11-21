@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Language } from '../types';
+import { ActStage, Language } from '../types';
 
 function addLowResGrain(ctx: CanvasRenderingContext2D, w: number, h: number, alpha = 0.05) {
   const imgData = ctx.getImageData(0, 0, w, h);
@@ -41,6 +41,101 @@ export function createWalnutDeskTexture(): THREE.CanvasTexture {
   return finalizeTexture(canvas, true);
 }
 
+export function createLoopingCalendarTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+
+  // Aged desk calendar paper
+  ctx.fillStyle = '#e5dcc7';
+  ctx.fillRect(0, 0, 256, 256);
+
+  // Header strip
+  ctx.fillStyle = '#7c2428';
+  ctx.fillRect(10, 10, 236, 42);
+  ctx.fillStyle = '#f2ead8';
+  ctx.font = 'bold 22px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('NOV // 1984', 128, 38);
+
+  // 5x4 grid of repeating crossed-out "11/13" cells
+  const cols = 5;
+  const rows = 4;
+  const startX = 12;
+  const startY = 62;
+  const cw = 46;
+  const ch = 44;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = startX + c * cw;
+      const y = startY + r * ch;
+      ctx.strokeStyle = '#6c6252';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(x, y, cw, ch);
+
+      // Printed date crossed out
+      ctx.fillStyle = '#4e463b';
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(String(r * cols + c + 1), x + 4, y + 13);
+
+      // Dense ballpoint/red cross-outs + repeated "11/13"
+      ctx.strokeStyle = (r + c) % 3 === 0 ? '#8c1d24' : '#1b2c4e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + 3, y + 4);
+      ctx.lineTo(x + cw - 3, y + ch - 4);
+      ctx.moveTo(x + cw - 3, y + 4);
+      ctx.lineTo(x + 3, y + ch - 4);
+      ctx.stroke();
+
+      ctx.fillStyle = (r + c) % 2 === 0 ? '#18294a' : '#851820';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText('11/13', x + 5, y + 34);
+    }
+  }
+
+  addLowResGrain(ctx, 256, 256, 0.06);
+  return finalizeTexture(canvas, true);
+}
+
+export function createStickyNoteTexture(variant: 0 | 1 | 2): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d')!;
+
+  const bgColors = ['#e8db8e', '#e3d17e', '#eadf9b'];
+  ctx.fillStyle = bgColors[variant];
+  ctx.fillRect(0, 0, 128, 128);
+
+  // Subtle top adhesive band
+  ctx.fillStyle = 'rgba(180, 162, 92, 0.35)';
+  ctx.fillRect(0, 0, 128, 22);
+
+  ctx.fillStyle = '#1b2a4a';
+  ctx.font = 'bold 15px monospace';
+  if (variant === 0) {
+    ctx.fillText('11/13', 14, 46);
+    ctx.fillText('CHECK #03', 14, 72);
+    ctx.fillText('AGAIN?', 14, 98);
+  } else if (variant === 1) {
+    ctx.fillText('CALL #209', 14, 48);
+    ctx.fillText('COFFEE', 14, 74);
+    ctx.fillText('NO REPLY', 14, 100);
+  } else {
+    ctx.fillText('ONLY 3', 14, 46);
+    ctx.fillText('IN PHOTO', 14, 72);
+    ctx.fillStyle = '#7c1a22';
+    ctx.fillText('#302 ???', 14, 98);
+  }
+
+  addLowResGrain(ctx, 128, 128, 0.06);
+  return finalizeTexture(canvas, true);
+}
+
 export function createNameplateTexture(): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
@@ -78,133 +173,46 @@ export function createNameplateTexture(): THREE.CanvasTexture {
 }
 
 export function createMonitorScreenCanvasTexture(
-  quotaCount: number,
-  file03Decrypted: boolean,
+  actStage: ActStage,
   lensBroken: boolean,
-  lang: Language,
-  endingARedactedCount = 0
+  _lang: Language,
+  endingChoice: 'A' | 'B' | null = null,
+  _endingARedactedCount = 0
 ): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 384;
+  canvas.width = 256;
+  canvas.height = 160;
   const ctx = canvas.getContext('2d')!;
 
-  // Screen background (warm charcoal-sepia or dark crimson-charcoal)
-  ctx.fillStyle = lensBroken ? '#16090b' : '#181613';
-  ctx.fillRect(0, 0, 512, 384);
-
-  // Outer terminal frame
-  ctx.strokeStyle = lensBroken ? '#9e2832' : '#7a7062';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(14, 14, 484, 356);
-
-  // Header bar
-  ctx.fillStyle = lensBroken ? '#360c11' : '#2b2722';
-  ctx.fillRect(16, 16, 480, 42);
-
-  const showCorruptedOperator = lensBroken && endingARedactedCount < 2;
-  ctx.fillStyle = '#e8e2d5';
-  ctx.font = 'bold 16px monospace';
-  ctx.fillText(
-    lang === 'zh'
-      ? `TCD-302 // ${showCorruptedOperator ? '合并索引点' : '档案员 #302'}`
-      : `TCD-302 // ${showCorruptedOperator ? 'MERGER NODE' : 'ARCHIVIST #302'}`,
-    28,
-    43
-  );
-
-  // Quota meter (overflows to 4/3 when lensBroken)
-  ctx.fillStyle = lensBroken ? '#e06c75' : '#d4c39e';
-  ctx.font = 'bold 20px monospace';
-  ctx.fillText(
-    lensBroken
-      ? lang === 'zh'
-        ? '今日配额进度: 4 / 3 (溢出)'
-        : 'COGNITIVE QUOTA: 4 / 3 (OVERFLOW)'
-      : lang === 'zh'
-      ? `认知配额进度: ${quotaCount} / 3`
-      : `COGNITIVE QUOTA: ${quotaCount} / 3`,
-    32,
-    98
-  );
-
-  // 3 (or 4 when broken) Quota segments
-  const totalSegs = lensBroken ? 4 : 3;
-  const segWidth = lensBroken ? 104 : 136;
-  const segStep = lensBroken ? 114 : 148;
-  for (let i = 0; i < totalSegs; i++) {
-    const isFourthOverflow = lensBroken && i === 3;
-    ctx.strokeStyle = isFourthOverflow
-      ? '#ff2e43'
-      : lensBroken
-      ? '#a82834'
-      : '#8c8273';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(32 + i * segStep, 114, segWidth, 24);
-    if (lensBroken || i < quotaCount) {
-      ctx.fillStyle = isFourthOverflow
-        ? '#d92638'
-        : lensBroken
-        ? '#b82534'
-        : '#dfd7c8';
-      ctx.fillRect(35 + i * segStep, 117, segWidth - 6, 18);
-    }
+  // Clean phosphor backdrop matching the live projected TCD-OS wallpaper
+  // (No static placeholder text — the live TcdOsDesktop stays projected over the screen)
+  if (endingChoice === 'B') {
+    ctx.fillStyle = '#030203';
+    ctx.fillRect(0, 0, 256, 160);
+  } else if (lensBroken && actStage === 3) {
+    const grad = ctx.createLinearGradient(0, 0, 0, 160);
+    grad.addColorStop(0, '#7ec8ff');
+    grad.addColorStop(0.58, '#fff9d6');
+    grad.addColorStop(1, '#ffe4ef');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 256, 160);
+  } else if (lensBroken && actStage >= 4) {
+    ctx.fillStyle = '#18090c';
+    ctx.fillRect(0, 0, 256, 160);
+  } else if (actStage === 2) {
+    ctx.fillStyle = '#133336';
+    ctx.fillRect(0, 0, 256, 160);
+  } else {
+    ctx.fillStyle = '#008080';
+    ctx.fillRect(0, 0, 256, 160);
   }
 
-  // Clearance / Filter status box
-  ctx.fillStyle = lensBroken ? '#24080b' : '#211e1a';
-  ctx.fillRect(32, 158, 448, 86);
-  ctx.strokeStyle = lensBroken ? '#7a1f28' : '#4a433b';
-  ctx.strokeRect(32, 158, 448, 86);
+  // Subtle scanlines
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
+  for (let y = 0; y < 160; y += 3) {
+    ctx.fillRect(0, y, 256, 1);
+  }
 
-  ctx.fillStyle = '#dfd7c8';
-  ctx.font = '14px monospace';
-  ctx.fillText(
-    lang === 'zh'
-      ? `> 档案 #03 状态: ${file03Decrypted ? '已显影解密 (STAGE B)' : '权限锁定 (0/1)'}`
-      : `> FILE #03 STATUS: ${file03Decrypted ? 'DECRYPTED (STAGE B)' : 'LOCKED (0/1)'}`,
-    46,
-    188
-  );
-  ctx.fillText(
-    lang === 'zh'
-      ? `> 认知滤镜状态: ${lensBroken ? '!! 已碎裂 (LENS BROKEN) !!' : '正常运转 (ACTIVE)'}`
-      : `> COGNITIVE LENS: ${lensBroken ? '!! SHATTERED !!' : 'ACTIVE (NORMAL)'}`,
-    46,
-    214
-  );
-
-  // Resignation / Action button preview on screen
-  ctx.fillStyle = lensBroken
-    ? '#8f1822'
-    : quotaCount === 3
-    ? '#e8e2d5'
-    : '#26231e';
-  ctx.fillRect(32, 268, 448, 52);
-  ctx.strokeStyle = '#dfd7c8';
-  ctx.strokeRect(32, 268, 448, 52);
-
-  ctx.fillStyle = quotaCount === 3 && !lensBroken ? '#141210' : '#e8e2d5';
-  ctx.font = 'bold 15px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(
-    lensBroken
-      ? lang === 'zh'
-        ? '[ 点击屏幕：长按离职 / 复核 3 号柜 ]'
-        : '[ CLICK MONITOR: HOLD TO RESIGN / AUDIT ]'
-      : quotaCount === 3
-      ? lang === 'zh'
-        ? '[ 配额 3/3 已满 —— 点击屏幕查看终端 ]'
-        : '[ QUOTA 3/3 READY — CLICK TO OPEN ]'
-      : lang === 'zh'
-      ? `[ 点击显示器操作终端 // 进度 (${quotaCount}/3) ]`
-      : `[ CLICK MONITOR TO OPERATE // (${quotaCount}/3) ]`,
-    256,
-    300
-  );
-  ctx.textAlign = 'left';
-
-  addLowResGrain(ctx, 512, 384, 0.05);
   return finalizeTexture(canvas, false);
 }
 
@@ -343,7 +351,7 @@ export function createPolaroidCanvasTexture(lensBroken: boolean): THREE.CanvasTe
   const ctx = canvas.getContext('2d')!;
 
   if (!lensBroken) {
-    // Warm sepia Polaroid frame
+    // Warm sepia Polaroid frame — 3 ID-sticker cutouts taped together (#209, C-14, M-04; NO #302)
     ctx.fillStyle = '#e6decb';
     ctx.fillRect(0, 0, 256, 300);
 
@@ -351,74 +359,82 @@ export function createPolaroidCanvasTexture(lensBroken: boolean): THREE.CanvasTe
     ctx.fillStyle = '#211e1a';
     ctx.fillRect(18, 18, 220, 206);
 
-    // 3 uneven collage paper strips
-    ctx.fillStyle = '#2e2923';
-    ctx.fillRect(24, 26, 68, 190);
-    ctx.fillStyle = '#363029';
-    ctx.fillRect(94, 24, 68, 192);
-    ctx.fillStyle = '#29241f';
-    ctx.fillRect(164, 32, 66, 184);
+    // 3 uneven ID-sticker cutout backing strips
+    ctx.fillStyle = '#332d26';
+    ctx.fillRect(24, 28, 66, 186);
+    ctx.fillStyle = '#3c352d';
+    ctx.fillRect(94, 24, 68, 190);
+    ctx.fillStyle = '#2c2722';
+    ctx.fillRect(166, 34, 64, 180);
 
-    // 3 warm monochrome family silhouettes (#302, Wife, Daughter)
-    ctx.fillStyle = '#998e7e';
-    // Left: #302
+    // Left: #209 Arthur ID cutout (subtle lapel tag, NOT #302)
+    ctx.fillStyle = '#9e9281';
     ctx.beginPath();
-    ctx.arc(58, 86, 20, 0, Math.PI * 2);
+    ctx.arc(57, 86, 19, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillRect(34, 112, 48, 98);
+    ctx.fillRect(34, 112, 46, 98);
+    ctx.fillStyle = '#dfd7c8';
+    ctx.fillRect(41, 134, 24, 11);
+    ctx.fillStyle = '#241f1a';
+    ctx.font = 'bold 8px monospace';
+    ctx.fillText('#209', 43, 142);
 
-    // Center: Wife
+    // Center: C-14 Lin cutout (subtle apron strap silhouette)
     ctx.fillStyle = '#a89d8c';
     ctx.beginPath();
-    ctx.arc(128, 92, 19, 0, Math.PI * 2);
+    ctx.arc(128, 92, 18, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillRect(105, 116, 46, 94);
+    ctx.strokeStyle = '#d6ccb8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(114, 134, 28, 54);
 
-    // Right: Daughter
+    // Right: M-04 Missing Girl cutout (smaller clipped corner portrait)
     ctx.fillStyle = '#b5aa98';
     ctx.beginPath();
-    ctx.arc(196, 114, 15, 0, Math.PI * 2);
+    ctx.arc(198, 114, 14, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillRect(176, 134, 40, 76);
+    ctx.fillRect(178, 134, 40, 76);
 
-    // Yellowing Scotch Tape Strips across seams
-    ctx.fillStyle = 'rgba(225, 212, 178, 0.38)';
+    // Yellowing Scotch Tape Strips across seams & corners
+    ctx.fillStyle = 'rgba(225, 212, 178, 0.45)';
     ctx.fillRect(86, 22, 14, 194);
-    ctx.fillRect(156, 28, 14, 188);
+    ctx.fillRect(158, 28, 14, 188);
+    ctx.fillRect(22, 24, 34, 12);
 
-    // Bottom Polaroid handwritten note
+    // Bottom Polaroid handwritten note emphasizing 3 subjects
     ctx.fillStyle = '#24201b';
-    ctx.font = 'bold 15px monospace';
+    ctx.font = 'bold 14px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('Family_Photo.jpg', 128, 254);
-    ctx.font = '11px monospace';
+    ctx.fillText('Family_Photo.jpg', 128, 250);
+    ctx.font = '10.5px monospace';
     ctx.fillStyle = '#595146';
-    ctx.fillText('SEC. 4 — STAY TOGETHER', 128, 276);
+    ctx.fillText('3 SUBJECTS: #209 · C-14 · M-04', 128, 274);
   } else {
-    // Broken Lens: Bloodied #209 Badge + C-14 Apron + M-04 Flyer Stapled Together
+    // Broken Lens: #209 Arthur ID + C-14 Lin Apron + M-04 Flyer bound by crimson staples & tape
     ctx.fillStyle = '#241416';
     ctx.fillRect(0, 0, 256, 300);
 
     ctx.fillStyle = '#120708';
     ctx.fillRect(14, 14, 228, 214);
 
-    // Bloodstains
+    // Dried dark stains
     ctx.fillStyle = '#4f0c13';
     ctx.beginPath();
     ctx.arc(95, 115, 42, 0, Math.PI * 2);
     ctx.arc(165, 135, 46, 0, Math.PI * 2);
     ctx.fill();
 
-    // Left: #209 ID Badge
+    // Left: #209 Arthur ID Badge
     ctx.fillStyle = '#cfc6b6';
     ctx.fillRect(22, 36, 66, 150);
     ctx.fillStyle = '#6e141c';
     ctx.fillRect(26, 42, 58, 18);
     ctx.fillStyle = '#1c1615';
-    ctx.font = 'bold 11px monospace';
-    ctx.fillText('#209 ID', 30, 85);
+    ctx.font = 'bold 10.5px monospace';
+    ctx.fillText('#209 ARTHUR', 24, 85);
 
-    // Center: C-14 Apron Tag
+    // Center: C-14 Lin Apron Tag
     ctx.fillStyle = '#bfae99';
     ctx.fillRect(94, 32, 68, 156);
     ctx.fillStyle = '#591016';
@@ -426,13 +442,18 @@ export function createPolaroidCanvasTexture(lensBroken: boolean): THREE.CanvasTe
     ctx.fillStyle = '#1c1615';
     ctx.fillText('C-14 LIN', 102, 85);
 
-    // Right: M-04 Flyer
+    // Right: M-04 Missing Girl Flyer
     ctx.fillStyle = '#dbd2c2';
     ctx.fillRect(168, 38, 66, 148);
     ctx.fillStyle = '#26211e';
     ctx.fillRect(172, 44, 58, 18);
     ctx.fillStyle = '#1c1615';
-    ctx.fillText('CASE M-04', 174, 85);
+    ctx.fillText('M-04 GIRL', 173, 85);
+
+    // Yellowing Masking Tape Strips
+    ctx.fillStyle = 'rgba(218, 202, 158, 0.5)';
+    ctx.fillRect(18, 26, 48, 14);
+    ctx.fillRect(188, 174, 48, 14);
 
     // Heavy Crimson Staples
     ctx.fillStyle = '#d92638';
@@ -442,11 +463,11 @@ export function createPolaroidCanvasTexture(lensBroken: boolean): THREE.CanvasTe
     ctx.fillRect(150, 148, 28, 7);
 
     ctx.fillStyle = '#e06c75';
-    ctx.font = 'bold 14px monospace';
+    ctx.font = 'bold 13.5px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('Photo_Truth.png', 128, 254);
-    ctx.font = '11px monospace';
-    ctx.fillText('STAPLED IN CABINET #3', 128, 276);
+    ctx.fillText('Photo_Truth.png', 128, 250);
+    ctx.font = '10px monospace';
+    ctx.fillText('3 BOUND — #302 NOT IN FRAME', 128, 274);
   }
 
   addLowResGrain(ctx, 256, 300, 0.06);
@@ -555,5 +576,133 @@ export function createPartitionGlassTexture(lensBroken: boolean): THREE.CanvasTe
   }
 
   addLowResGrain(ctx, 512, 256, 0.05);
+  return finalizeTexture(canvas, true);
+}
+
+export function createCabinetLabelTexture(
+  code: string,
+  locked: boolean
+): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 160;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Brass holder rim
+  ctx.fillStyle = '#5c533c';
+  ctx.fillRect(0, 0, 160, 64);
+
+  // Aged cream paper card insert
+  ctx.fillStyle = locked ? '#d4c9b2' : '#e4dbc6';
+  ctx.fillRect(8, 8, 144, 48);
+
+  ctx.strokeStyle = '#332f28';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(10, 10, 140, 44);
+
+  ctx.fillStyle = '#181a17';
+  ctx.font = 'bold 20px monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(code, 80, locked ? 24 : 33);
+
+  if (locked) {
+    ctx.fillStyle = '#851b22';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText('[LOCKED]', 80, 44);
+  }
+
+  addLowResGrain(ctx, 160, 64, 0.05);
+  return finalizeTexture(canvas, true);
+}
+
+export function createTapeDeckFaceTexture(isPlaying: boolean): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 160;
+  const ctx = canvas.getContext('2d')!;
+
+  // Brushed dark aluminum plate
+  ctx.fillStyle = '#6d726f';
+  ctx.fillRect(0, 0, 256, 160);
+  ctx.strokeStyle = '#242725';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, 248, 152);
+
+  // Left speaker grille dot grid
+  ctx.fillStyle = '#1b1d1c';
+  for (let y = 20; y <= 136; y += 11) {
+    for (let x = 18; x <= 104; x += 11) {
+      ctx.fillRect(x, y, 5, 5);
+    }
+  }
+
+  // Model plate & playback status strip on right side
+  ctx.fillStyle = '#1d201f';
+  ctx.fillRect(122, 18, 118, 30);
+  ctx.fillStyle = '#d4d8d0';
+  ctx.font = 'bold 14px monospace';
+  ctx.fillText('TCD-REC 84', 132, 38);
+
+  ctx.fillStyle = isPlaying ? '#1b3620' : '#262928';
+  ctx.fillRect(122, 114, 118, 28);
+  ctx.fillStyle = isPlaying ? '#7cf08d' : '#b2b8b0';
+  ctx.font = 'bold 12px monospace';
+  ctx.fillText(isPlaying ? '>> PLAYING' : '|| STOPPED', 136, 132);
+
+  addLowResGrain(ctx, 256, 160, 0.06);
+  return finalizeTexture(canvas, true);
+}
+
+export function createConcreteWallTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+
+  // Muted institutional basement plaster / painted cinderblock
+  ctx.fillStyle = '#2d312c';
+  ctx.fillRect(0, 0, 256, 256);
+
+  ctx.strokeStyle = 'rgba(18, 20, 18, 0.42)';
+  ctx.lineWidth = 2;
+  for (let row = 0; row < 8; row++) {
+    const y = row * 32;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(256, y);
+    ctx.stroke();
+
+    const offset = row % 2 === 0 ? 0 : 32;
+    for (let x = offset; x < 256; x += 64) {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y + 32);
+      ctx.stroke();
+    }
+  }
+
+  addLowResGrain(ctx, 256, 256, 0.07);
+  return finalizeTexture(canvas, true);
+}
+
+export function createBasementTileTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.fillStyle = '#1f221f';
+  ctx.fillRect(0, 0, 256, 256);
+
+  for (let y = 0; y < 256; y += 64) {
+    for (let x = 0; x < 256; x += 64) {
+      const checker = ((x + y) / 64) % 2 === 0;
+      ctx.fillStyle = checker ? '#232723' : '#1c201d';
+      ctx.fillRect(x + 2, y + 2, 60, 60);
+    }
+  }
+
+  addLowResGrain(ctx, 256, 256, 0.06);
   return finalizeTexture(canvas, true);
 }
