@@ -805,8 +805,8 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
 
         {/* FOCUSED VINTAGE DESK LAMP (Back-Left Desk Corner) */}
         <VintageDeskLampMesh
-          position={[-0.7, 0.76, -0.34]}
-          rotation={[0, 0.45, 0]}
+          position={[-0.73, 0.76, -0.35]}
+          rotation={[0, 0.08, 0]}
           isOn={isDeskLampOn}
           lensBroken={lensBroken}
           brightness={brightness}
@@ -903,7 +903,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
         </InteractableProp>
 
         <InteractableProp
-          restPosition={[0.44, 0.766, 0.42]}
+          restPosition={[0.46, 0.766, 0.43]}
           restRotation={[0, -0.45, 0]}
           hoverLabel={
             lang === 'zh' ? '[陶瓷马克杯 — 查看]' : '[COFFEE MUG — INSPECT]'
@@ -911,7 +911,7 @@ export const DeskScene: React.FC<DeskSceneProps> = ({
           showWorldPrompt={showWorldPrompts}
           inspectPosition={[0, 1.31, 1.46]}
           inspectRotation={[0.32, -0.35, 0]}
-          inspectScale={1.65}
+          inspectScale={1.32}
           isFocused={focusTarget === 'prop_mug'}
           onHoverChange={(h) =>
             onHoverPropChange(

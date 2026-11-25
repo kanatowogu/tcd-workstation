@@ -270,7 +270,7 @@ export const CoffeeMugMesh: React.FC<{ lensBroken: boolean }> = ({
   lensBroken,
 }) => {
   return (
-    <group>
+    <group scale={1.3}>
       {/* Square Cork/Paper Coaster */}
       <mesh position={[0, 0.004, 0]} receiveShadow>
         <boxGeometry args={[0.13, 0.008, 0.13]} />
@@ -539,6 +539,11 @@ export const WitheredPlantMesh: React.FC<{
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation();
         setHovered(true);
+        onHoverLabel?.(
+          lang === 'zh'
+            ? '[ 磁带录音机 / CASSETTE RECORDER ]'
+            : '[ CASSETTE RECORDER ]'
+        );
         onHoverLabel?.(
           lang === 'zh'
             ? '[ 磁带录音机 / CASSETTE RECORDER ]'
@@ -1152,6 +1157,11 @@ export const TapeRecorderMesh: React.FC<TapeRecorderMeshProps> = ({
             ? '[ 磁带录音机 / CASSETTE RECORDER ]'
             : '[ CASSETTE RECORDER ]'
         );
+        onHoverLabel?.(
+          lang === 'zh'
+            ? '[ 磁带录音机 / CASSETTE RECORDER ]'
+            : '[ CASSETTE RECORDER ]'
+        );
         document.body.style.cursor = 'pointer';
       }}
       onPointerOut={(e: ThreeEvent<PointerEvent>) => {
@@ -1329,8 +1339,8 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
       }}
     >
       {/* Heavy Octagonal Cast-Metal Base */}
-      <mesh position={[0, 0.014, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.082, 0.092, 0.028, 8]} />
+      <mesh position={[0, 0.02, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.115, 0.128, 0.04, 8]} />
         <meshStandardMaterial
           color={hovered ? '#47524a' : '#2e3530'}
           roughness={0.55}
@@ -1339,8 +1349,8 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
         />
       </mesh>
       {/* Rocker Power Switch Button on Base */}
-      <mesh position={[0.02, 0.032, 0.048]} castShadow>
-        <boxGeometry args={[0.022, 0.012, 0.018]} />
+      <mesh position={[0.028, 0.044, 0.066]} castShadow>
+        <boxGeometry args={[0.03, 0.016, 0.025]} />
         <meshStandardMaterial
           color={isOn ? '#c49d56' : '#635c50'}
           roughness={0.5}
@@ -1350,11 +1360,11 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
 
       {/* Lower Articulated Arm */}
       <mesh
-        position={[-0.015, 0.16, -0.025]}
+        position={[-0.02, 0.225, -0.034]}
         rotation={[-0.22, 0, 0.14]}
         castShadow
       >
-        <boxGeometry args={[0.018, 0.29, 0.018]} />
+        <boxGeometry args={[0.025, 0.405, 0.025]} />
         <meshStandardMaterial
           color="#3a403c"
           metalness={0.55}
@@ -1364,8 +1374,8 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
       </mesh>
 
       {/* Brass Elbow Joint Screw */}
-      <mesh position={[-0.035, 0.295, -0.058]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.016, 0.016, 0.026, 6]} />
+      <mesh position={[-0.048, 0.415, -0.08]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.036, 6]} />
         <meshStandardMaterial
           color="#9e874e"
           metalness={0.7}
@@ -1376,11 +1386,11 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
 
       {/* Upper Articulated Arm Reaching Forward Toward Manual & Lunchbox */}
       <mesh
-        position={[0.04, 0.35, 0.075]}
-        rotation={[1.15, 0, -0.18]}
+        position={[0.048, 0.49, 0.1]}
+        rotation={[1.15, 0, -0.14]}
         castShadow
       >
-        <boxGeometry args={[0.016, 0.28, 0.016]} />
+        <boxGeometry args={[0.022, 0.39, 0.022]} />
         <meshStandardMaterial
           color="#3a403c"
           metalness={0.55}
@@ -1390,9 +1400,9 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
       </mesh>
 
       {/* Faceted Metal Lamp Shade & Bulb Mouth */}
-      <group position={[0.105, 0.385, 0.2]} rotation={[0.42, 0, -0.22]}>
+      <group position={[0.12, 0.54, 0.28]} rotation={[0.42, 0, -0.18]}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.034, 0.088, 0.095, 8]} />
+          <cylinderGeometry args={[0.048, 0.123, 0.133, 8]} />
           <meshStandardMaterial
             color={hovered ? '#47524a' : '#2e3530'}
             roughness={0.5}
@@ -1401,8 +1411,8 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
           />
         </mesh>
         {/* Warm Emissive Bulb Core */}
-        <mesh position={[0, -0.032, 0]}>
-          <octahedronGeometry args={[0.024, 0]} />
+        <mesh position={[0, -0.045, 0]}>
+          <octahedronGeometry args={[0.034, 0]} />
           <meshStandardMaterial
             color={isOn ? '#fff6db' : '#5e5a52'}
             emissive={isOn ? (lensBroken ? '#ffd485' : '#ffeaad') : '#000000'}
@@ -1413,9 +1423,9 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
         {/* Focused Warm Localized Light Pool over Manual, Lunchbox & Left Desk Corner */}
         {isOn && (
           <pointLight
-            position={[0, -0.065, 0.02]}
-            intensity={(lensBroken ? 2.4 : 2.15) * brightness}
-            distance={1.75}
+            position={[0, -0.09, 0.028]}
+            intensity={(lensBroken ? 2.65 : 2.4) * brightness}
+            distance={2.15}
             decay={2}
             color={lensBroken ? '#ffd996' : '#ffdfa8'}
           />
@@ -1423,7 +1433,7 @@ export const VintageDeskLampMesh: React.FC<VintageDeskLampMeshProps> = ({
       </group>
 
       {hovered && showWorldPrompt && (
-        <Html position={[0.08, 0.52, 0.14]} center style={{ pointerEvents: 'none' }}>
+        <Html position={[0.12, 0.7, 0.22]} center style={{ pointerEvents: 'none' }}>
           <div className="ps1-world-prompt">
             {isOn
               ? lang === 'zh'
