@@ -1535,7 +1535,12 @@ export const DeskCalendarMesh: React.FC<DeskCalendarMeshProps> = ({
       ))}
 
       {hovered && showWorldPrompt && (
-        <Html position={[0, 0.19, 0.02]} center style={{ pointerEvents: 'none' }}>
+        <Html
+          position={[0.06, 0.21, 0.03]}
+          center
+          zIndexRange={[45, 45]}
+          style={{ pointerEvents: 'none' }}
+        >
           <div className="ps1-world-prompt">
             {lang === 'zh'
               ? '[桌面台历 (11/13) — 查看]'
